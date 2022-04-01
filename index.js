@@ -18,6 +18,9 @@ const { json } = require('express/lib/response');
 //used to give each item added a unique ID
 var itemIDCounter = 0
 
+//give user an id based 
+var userID = Date.now()
+
 //dummy user - when we get to multiple users, this should change somehow
 var user1 = new User ({
 	name: 'Bryn Mawr',
@@ -32,6 +35,56 @@ var fridge1 = new Fridge ({
 	users: [],
 	items: []
 });
+
+//add user
+app.use('/adduser', (req,res)=>{
+	var newUser = new User({
+		name: req.body.name,
+		id: userID,
+		roomNumber: req.body.roomNumber,
+		myItems: req.body.item
+
+});
+console.log(newUser)
+userID++
+//save the person to the database
+	newUser.save( (err) => { 
+		if (err) {
+		    res.type('html').status(200);
+		    res.write('uh oh: ' + err);
+		    console.log(err);
+		    res.end();
+		}
+				else {
+		    // display the "successfull created" message
+		    res.send('successfully added ' + newUser + ' to the database');
+		}
+
+
+});
+    res.redirect('/all');
+});
+
+
+//remove user
+app.use('/removeuser', (req, res) => {
+	var filter = {'name': req.query.name}
+	User.findOneAndDelete(filter, (err,user)=>{
+		if (err){
+			console.log("error")
+
+		}
+		else if(!user){
+		console.log("No User")
+		}
+		else{
+			console.log("deleted successfully")
+		}
+	})
+
+    res.redirect('/all');
+});
+
 
 app.use('/create', (req, res) => {
 	// construct the Item from the form data which is in the request body
