@@ -63,6 +63,74 @@ app.use('/create', (req, res) => {
 	    } ); 
     });
 
+// endpoint for showing all the items
+app.use('/all', (req, res) => {
+    
+	// find all the item objects in the database
+		//can later expand to fridges/users
+	
+	Item.find({}, (err, items) => {
+		if (err) 
+		{
+			res.type('html').status(200);
+			console.log('uh oh' + err);
+			res.write(err);
+		}else
+		{
+			if (items.length == 0)
+			{
+				res.type('html').status(200);
+				res.write('There are no items');
+				res.end();
+				return;
+			}
+			else{
+				res.type('html').status(200);
+				res.write('Here are the items in the database:');
+				res.write('<ul>');
+				// show all the people
+				persons.forEach( (item) => {
+			    	res.write('<li>');
+					res.write('Name: ' + item.name + '; Id: ' + item.id + '; Expiration Date: ' + item.expDate);
+			    	
+			    	// this creates a link to the /delete endpoint
+			    	res.write(" <a href=\"/delete?id=" + item.id + "\">[Delete]</a>");
+			    	res.write('</li>');
+					 
+				});
+				res.write('</ul>');
+				res.end();
+			}
+		}
+
+	}).sort({ "id": 'asc'});//sorts by id
+});
+
+
+app.use('/delete', (req, res) => {
+
+	if (!req.query.id)
+	{
+		console.log('error id does not exist in url');
+	}
+
+	var filter = {'id':req.query.id};
+
+	Person.findOneAndDelete(filter, (err, item) => {
+		if (err){
+			console.log('person does not exist in database');
+		}else if (!person)
+		{
+			console.log('no person');
+		}else
+		{
+			console.log({'status': 'success'});
+		}
+	})
+
+    res.redirect('/all');
+	});	
+
 //adds the item directly to the database
 /*app.use('/create', (req, res) => {
 	// construct the Item from the form data which is in the request body
