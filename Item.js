@@ -11,7 +11,7 @@ var Schema = mongoose.Schema;
 
 var itemSchema = new Schema({
     type: {type: String, required: true}, //changed from 'name'
-	id: {type: Number, required: true, unique: true},
+    id: {type: Number, required: true, unique: true},
     expDate: {type: Date, required: true},
     dateAdded: Date,
     });

@@ -10,8 +10,8 @@ var Schema = mongoose.Schema;
 
 var fridgeSchema = new Schema({
 	id: {type: Number, required: true, unique: true},
-    users: [],
-    items: []
+  users: [],
+  items: []
     });
 
 // export fridgeSchema as a class called Fridge
