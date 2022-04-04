@@ -208,7 +208,8 @@ app.use('/allItems', (req, res) => {
 	// find all the item objects in the database
 		//can later expand to fridges/users
 
-	Item.find({}, (err, items) => {
+	Fridge.find({}, (err, fridges) => {
+
 		if (err)
 		{
 			res.type('html').status(200);
@@ -216,27 +217,38 @@ app.use('/allItems', (req, res) => {
 			res.write(err);
 		}else
 		{
-			if (items.length == 0)
+			if (fridges.length == 0)
 			{
 				res.type('html').status(200);
-				res.write('There are no items');
+				res.write('There are no fridges');
 				res.end();
 				return;
 			}
 			else{
+				
 				res.type('html').status(200);
 				res.write('Here are the items in the database:');
 				res.write('<ul>');
-				// show all the people
-				persons.forEach( (item) => {
-			    	res.write('<li>');
-					res.write('Name: ' + item.name + '; Id: ' + item.id + '; Expiration Date: ' + item.expDate);
+				// show all the items
+				
+				fridges.forEach( (fridge) => {
 
-			    	// this creates a link to the /delete endpoint
-			    	res.write(" <a href=\"/delete?id=" + item.id + "\">[Delete]</a>");
-			    	res.write('</li>');
+					var length = fridge.items.length;
+					var count = 0;
+					while (count < length)
+					{
+						res.write('<li>');
+						res.write('Type: ' + fridge.items[count].type + '; Id: ' + fridge.items[count].id + '; Expiration Date: ' + fridge.items[count].expDate);
+	
+						// this creates a link to the /delete endpoint
+						res.write(" <a href=\"/delete?id=" + fridge.items[0].id + "\">[Delete]</a>");
+						res.write('</li>');
+						count = count + 1;
 
+					}
+	
 				});
+				
 				res.write('</ul>');
 				res.end();
 			}
@@ -304,21 +316,22 @@ app.use('/delete', (req, res) => {
 		console.log('error id does not exist in url');
 	}
 
-	var filter = {'id':req.query.id};
+	var filter = {'id': 0};
+	var action = {'$pull': {id: req.query.id }}
 
-	Person.findOneAndDelete(filter, (err, item) => {
-		if (err){
-			console.log('person does not exist in database');
-		}else if (!person)
-		{
-			console.log('no person');
-		}else
-		{
-			console.log({'status': 'success'});
+	Fridge.findOneAndUpdate( filter, action, (err, orig) => {
+		if (err) {
+		    res.type('html').status(200);
+		    res.write('uh oh: ' + err);
+		    console.log(err);
+		    res.end();
 		}
-	})
+		else {
+		    // display the "successfull created" message
+			res.redirect('/all');
+		}
+	    } );
 
-    res.redirect('/all');
 	});
 
 //adds the item directly to the database
