@@ -175,10 +175,10 @@ app.use('/edit_item_owner', (req, res) => {
 app.use('/create', (req, res) => {
 	// construct the Item from the form data which is in the request body
 	var newItem = new Item ({
-			type: req.body.type,
+		type: req.body.type,
 	    id: itemIDCounter,
-      expDate: req.body.expDate,
-      dateAdded: req.body.dateAdded
+      	expDate: req.body.expDate,
+      	dateAdded: req.body.dateAdded
 	    });
 	console.log(newItem);
 	itemIDCounter++;
@@ -213,7 +213,7 @@ app.use('/all', (req, res) => {
 		if (err)
 		{
 			res.type('html').status(200);
-			console.log('uh oh' + err);
+			console.log('uh oh: ' + err);
 			res.write(err);
 		}else
 		{
@@ -227,12 +227,14 @@ app.use('/all', (req, res) => {
 			else{
 				
 				res.type('html').status(200);
-				res.write('Here are the items in the database:');
+				res.write('Here are the items in the database:<br>');
+				res.write(" <a href=\"/show_expired\">[Expired Items]</a>");
 				// show all the items
 				
 				fridges.forEach( (fridge) => {
 					res.write('<br><br>')
 					res.write('Fridge #' + fridge.id + ':');
+
 					var length = fridge.items.length;
 					var count = 0;
 					res.write('<ul>');
@@ -261,16 +263,14 @@ app.use('/all', (req, res) => {
 	}).sort({ "id": 'asc'});//sorts by id
 });
 
-// endpoint for showing all the fridges
-app.use('/allFridges', (req, res) => {
-
-	// find all the fridge objects in the database
+app.use('/show_expired', (req, res) => {
 
 	Fridge.find({}, (err, fridges) => {
+
 		if (err)
 		{
 			res.type('html').status(200);
-			console.log('uh oh' + err);
+			console.log('uh oh: ' + err);
 			res.write(err);
 		}else
 		{
@@ -282,42 +282,49 @@ app.use('/allFridges', (req, res) => {
 				return;
 			}
 			else{
+				
 				res.type('html').status(200);
-				res.write('Here are the fridges in the database:');
-				res.write('<ul>');
-				// show all the people
+				res.write('Expired items in your fridges:<br>');
+				
 				fridges.forEach( (fridge) => {
-			    	res.write('<li>');
-					res.write('Id: ' + fridge.id + '; users: ' + fridge.users + '\nItems: ');
-					
-					res.write('<ol>');
-					fridge.items.forEach( (item) => {
-						res.write('<li>');
-						res.write('Type: ' + item.type + '; ID: ' + item.id + '; Expiration Date: ' + item.expDate + '; Date Added ' + item.dateAdded);
-						res.write('');
-						res.write('</li');
-					});
-					res.write('</ol>');
+					res.write('<br>')
+					res.write('Fridge #' + fridge.id + ':');
 
-			    	// this creates a link to the /delete endpoint
-			    	res.write(" <a href=\"/delete?id=" + fridge.id + "\">[Delete]</a>");
-			    	res.write('</li>');
+					var length = fridge.items.length;
+					var count = 0;
+					res.write('<ul>');
+					res.write('<li>Expired Items:</li>')
+					res.write('<ul>');
+					while (count < length)
+					{
+						if(fridge.items[count].expDate < Date.now()) {
+							res.write('<li>');
+							//res.write('Type: ' + fridge.items[count].type + '; Id: ' + fridge.items[count].id + '; Expiration Date: ' + fridge.items[count].expDate);
+							res.write(fridge.items[count].type + ' expired on ' + fridge.items[count].expDate + '; belongs to: (add later)');
+		
+							res.write('</li>');
+						}
+						count = count + 1;
 
+					}
+					res.write('</ul>');
+					res.write('</ul>');
 				});
-				res.write('</ul>');
+				
+				
 				res.end();
 			}
 		}
 
-	}).sort({ "id": 'asc'});//sorts by id
-});
+	}).sort({ 'expDate': 'asc'});//doesn't work, but figure out how to sort
 
+});
 
 app.use('/delete', (req, res) => {
 
 	if (!req.query.id)
 	{
-		console.log('error id does not exist in url');
+		console.log('error: id does not exist in url');
 	}
 
 	var filter = {'id': 0};
