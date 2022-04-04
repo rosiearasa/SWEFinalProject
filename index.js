@@ -39,15 +39,15 @@ var fridge1 = new Fridge ({
 //add user
 app.use('/adduser', (req,res)=>{
 	var newUser = new User({
-		name: req.body.name,
+		name: req.query.name,
 		id: userID,
-		roomNumber: req.body.roomNumber,
-		myItems: req.body.item
+		roomNumber: req.query.roomNumber,
+		myItems: req.query.item
 
-});
-console.log(newUser)
-userID++
-//save the person to the database
+	});
+	console.log(newUser)
+	userID++
+	//save the person to the database
 	newUser.save( (err) => {
 		if (err) {
 		    res.type('html').status(200);
@@ -183,7 +183,7 @@ app.use('/create', (req, res) => {
 	console.log(newItem);
 	itemIDCounter++;
 
-	//make fridge ID a variable laterf
+	//make fridge ID a variable later
 	var filter = { 'id' : 0 };
 	var action = { '$push' : { 'items' : newItem } };
 
@@ -203,7 +203,7 @@ app.use('/create', (req, res) => {
     });
 
 // endpoint for showing all the items
-app.use('/all', (req, res) => {
+app.use('/allItems', (req, res) => {
 
 	// find all the item objects in the database
 		//can later expand to fridges/users
@@ -234,6 +234,57 @@ app.use('/all', (req, res) => {
 
 			    	// this creates a link to the /delete endpoint
 			    	res.write(" <a href=\"/delete?id=" + item.id + "\">[Delete]</a>");
+			    	res.write('</li>');
+
+				});
+				res.write('</ul>');
+				res.end();
+			}
+		}
+
+	}).sort({ "id": 'asc'});//sorts by id
+});
+
+// endpoint for showing all the fridges
+app.use('/allFridges', (req, res) => {
+
+	// find all the fridge objects in the database
+
+	Fridge.find({}, (err, fridges) => {
+		if (err)
+		{
+			res.type('html').status(200);
+			console.log('uh oh' + err);
+			res.write(err);
+		}else
+		{
+			if (fridges.length == 0)
+			{
+				res.type('html').status(200);
+				res.write('There are no fridges');
+				res.end();
+				return;
+			}
+			else{
+				res.type('html').status(200);
+				res.write('Here are the fridges in the database:');
+				res.write('<ul>');
+				// show all the people
+				fridges.forEach( (fridge) => {
+			    	res.write('<li>');
+					res.write('Id: ' + fridge.id + '; users: ' + fridge.users + '\nItems: ');
+					
+					res.write('<ol>');
+					fridge.items.forEach( (item) => {
+						res.write('<li>');
+						res.write('Type: ' + item.type + '; ID: ' + item.id + '; Expiration Date: ' + item.expDate + '; Date Added ' + item.dateAdded);
+						res.write('');
+						res.write('</li');
+					});
+					res.write('</ol>');
+
+			    	// this creates a link to the /delete endpoint
+			    	res.write(" <a href=\"/delete?id=" + fridge.id + "\">[Delete]</a>");
 			    	res.write('</li>');
 
 				});
