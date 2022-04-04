@@ -203,7 +203,7 @@ app.use('/create', (req, res) => {
     });
 
 // endpoint for showing all the items
-app.use('/allItems', (req, res) => {
+app.use('/all', (req, res) => {
 
 	// find all the item objects in the database
 		//can later expand to fridges/users
@@ -228,13 +228,16 @@ app.use('/allItems', (req, res) => {
 				
 				res.type('html').status(200);
 				res.write('Here are the items in the database:');
-				res.write('<ul>');
 				// show all the items
 				
 				fridges.forEach( (fridge) => {
-
+					res.write('<br><br>')
+					res.write('Fridge #' + fridge.id + ':');
 					var length = fridge.items.length;
 					var count = 0;
+					res.write('<ul>');
+					res.write('<li>Items:</li>')
+					res.write('<ul>');
 					while (count < length)
 					{
 						res.write('<li>');
@@ -246,10 +249,11 @@ app.use('/allItems', (req, res) => {
 						count = count + 1;
 
 					}
-	
+					res.write('</ul>');
+					res.write('</ul>');
 				});
 				
-				res.write('</ul>');
+				
 				res.end();
 			}
 		}
