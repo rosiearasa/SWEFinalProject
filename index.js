@@ -203,7 +203,7 @@ app.use('/add_item', (req, res) => {
 	// construct the Item from the form data which is in the request body
 	var newItem = new Item ({
 		type: req.body.type,
-		expDate: req.body.expDate,
+		expDate: new Date(req.body.expDate),
 		dateAdded: req.body.dateAdded,
 		user: null,
 		inFridge: 0,
@@ -312,30 +312,17 @@ app.use('/show_expired', (req, res) => {
 				res.write('Expired items in your fridges:<br>');
 				
 				items.forEach( (item) => {
-					res.write('<br>')
-					res.write('Fridge #' + fridge.id + ':');
-
-					var length = fridge.items.length;
 					var count = 0;
 					res.write('<ul>');
-					res.write('<li>Expired Items:</li>')
-					res.write('<ul>');
-					while (count < length)
-					{
-						if(fridge.items[count].expDate < Date.now()) {
-							res.write('<li>');
-							//res.write('Type: ' + fridge.items[count].type + '; Id: ' + fridge.items[count].id + '; Expiration Date: ' + fridge.items[count].expDate);
-							res.write(fridge.items[count].type + ' expired on ' + fridge.items[count].expDate + '; belongs to: (add later)');
-		
-							res.write('</li>');
-						}
-						count = count + 1;
-
+					if(item.expDate < Date.now()) {
+						res.write('<li>');
+						//res.write('Type: ' + fridge.items[count].type + '; Id: ' + fridge.items[count].id + '; Expiration Date: ' + fridge.items[count].expDate);
+						res.write(item.type + ' expired on ' + (item.expDate).toDateString() + '; belongs to: (add later)');
+	
+						res.write('</li>');
 					}
 					res.write('</ul>');
-					res.write('</ul>');
 				});
-				
 				
 				res.end();
 			}
@@ -400,14 +387,14 @@ app.use('/api', (req, res) => {
 		    var item = items[0];
 		    // send back a single JSON object
 		    //res.json( { "type" : item.type, "id" : item.id , "expDate" : item.expDate, "dateAdded" : item.dateAdded } );
-			res.json( { 'type' : item.type, 'expDate' : item.expDate } );
+			res.json( { 'type' : item.type, 'expDate' : (item.expDate).toDateString() } );
 		}
 		else {
 		    // construct an array out of the result
 		    var returnArray = [];
 		    items.forEach( (item) => {
 			    //returnArray.push( { "type" : item.type, "id" : item.id , "expDate" : item.expDate, "dateAdded" : item.dateAdded } );
-				returnArray.push( { 'type' : item.type, 'expDate' : item.expDate } );
+				returnArray.push( { 'type' : item.type, 'expDate' : (item.expDate).toDateString() } );
 			});
 		    // send it back as JSON Array
 		    res.json(returnArray);
