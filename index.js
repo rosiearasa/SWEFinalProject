@@ -167,7 +167,7 @@ app.use('/edit_item_owner', (req, res) => {
 	}
 });
 
-app.use('/create', (req, res) => {
+/*app.use('/add_item', (req, res) => {
 	// construct the Item from the form data which is in the request body
 	var newItem = new Item ({
 		type: req.body.type,
@@ -196,6 +196,36 @@ app.use('/create', (req, res) => {
 		}
 	    } );
     });
+*/
+
+//adds the item directly to the database
+app.use('/add_item', (req, res) => {
+	// construct the Item from the form data which is in the request body
+	var newItem = new Item ({
+		type: req.body.type,
+		expDate: req.body.expDate,
+		dateAdded: req.body.dateAdded,
+		user: null,
+		inFridge: 0,
+		id: Date.now() / 60
+		});
+	console.log(newItem);
+	itemIDCounter++;
+
+	// save the item to the database
+	newItem.save( (err) => {
+		if (err) {
+			res.type('html').status(200);
+			res.write('uh oh: ' + err);
+			console.log(err);
+			res.end();
+		}
+		else {
+			// display the "successfull created" message
+			res.send('Successfully added ' + newItem.type + ' to the database');
+		}
+		} );
+	});
 
 // endpoint for showing all the items
 app.use('/all', (req, res) => {
@@ -260,7 +290,7 @@ app.use('/all', (req, res) => {
 
 app.use('/show_expired', (req, res) => {
 
-	Fridge.find({}, (err, fridges) => {
+	Item.find({}, (err, items) => {
 
 		if (err)
 		{
@@ -269,7 +299,7 @@ app.use('/show_expired', (req, res) => {
 			res.write(err);
 		}else
 		{
-			if (fridges.length == 0)
+			if (items.length == 0)
 			{
 				res.type('html').status(200);
 				res.write('There are no fridges');
@@ -281,7 +311,7 @@ app.use('/show_expired', (req, res) => {
 				res.type('html').status(200);
 				res.write('Expired items in your fridges:<br>');
 				
-				fridges.forEach( (fridge) => {
+				items.forEach( (item) => {
 					res.write('<br>')
 					res.write('Fridge #' + fridge.id + ':');
 
@@ -340,33 +370,7 @@ app.use('/delete', (req, res) => {
 
 	});
 
-//adds the item directly to the database
-/*app.use('/create', (req, res) => {
-	// construct the Item from the form data which is in the request body
-	var newItem = new Item ({
-		type: req.body.type,
-		id: itemIDCounter,
-		expDate: req.body.expDate,
-		dateAdded: req.body.dateAdded
-		});
-	console.log(newItem);
-	itemIDCounter++;
 
-	// save the item to the database
-	newItem.findOneAndUpdate( (err) => {
-		if (err) {
-			res.type('html').status(200);
-			res.write('uh oh: ' + err);
-			console.log(err);
-			res.end();
-		}
-		else {
-			// display the "successfull created" message
-			res.send('Successfully added ' + newItem.type + ' to the database');
-		}
-		} );
-	});
-*/
 
 
 /* From Lab7 index.js so I can test /create */
@@ -382,28 +386,28 @@ app.use('/api', (req, res) => {
 	    queryObject = { "id" : req.query.id };
 	};
 
-	Fridge.find( queryObject, (err, fridges) => {
-		console.log(fridges);
+	Item.find( queryObject, (err, items) => {
+		console.log(items);
 		if (err) {
 		    console.log('uh oh' + err);
 		    res.json({});
 		}
-		else if (fridges.length == 0) {
+		else if (items.length == 0) {
 		    // no objects found, so send back empty json
 		    res.json({});
 		}
-		else if (fridges.length == 1 ) {
-		    var fridge = fridges[0];
+		else if (items.length == 1 ) {
+		    var item = items[0];
 		    // send back a single JSON object
 		    //res.json( { "type" : item.type, "id" : item.id , "expDate" : item.expDate, "dateAdded" : item.dateAdded } );
-			res.json( { "id" : fridge.id, "users" : fridge.users, "items" : fridge.items } );
+			res.json( { 'type' : item.type, 'expDate' : item.expDate } );
 		}
 		else {
 		    // construct an array out of the result
 		    var returnArray = [];
-		    fridges.forEach( (item) => {
+		    items.forEach( (item) => {
 			    //returnArray.push( { "type" : item.type, "id" : item.id , "expDate" : item.expDate, "dateAdded" : item.dateAdded } );
-				returnArray.push( { "id" : fridge.id, "users" : fridge.users, "items" : fridge.items } );
+				returnArray.push( { 'type' : item.type, 'expDate' : item.expDate } );
 			});
 		    // send it back as JSON Array
 		    res.json(returnArray);
@@ -418,7 +422,7 @@ app.use('/public', express.static('public'));
 
 //register a fridge that items will get added to if needed and redirect to the form to add
 app.use('/', (req, res) => {
-	//add a base fridge to the database if one doesn't already exist
+	/*//add a base fridge to the database if one doesn't already exist
 	Fridge.find( (err, allFridges) => {
 		if (err) {
 			console.log(err);
@@ -432,7 +436,7 @@ app.use('/', (req, res) => {
 				}
 			});
 		}
-	});
+	});*/
 
 	res.redirect('/public/addItemForm.html');
 });
