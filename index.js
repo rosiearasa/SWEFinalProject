@@ -39,16 +39,12 @@ var fridge1 = new Fridge ({
 //add user
 app.use('/adduser', (req,res)=>{
 	var newUser = new User({
-		name: req.query.name,
-		id: userID,
-		roomNumber: req.query.roomNumber,
-		myItems: req.query.item
-
-	});
-	console.log(newUser)
-	userID++
-	//save the person to the database
-	newUser.save( (err) => {
+		name: req.body.name,
+		roomNumber: req.body.roomNumber,
+});
+console.log(newUser)
+// //save the person to the database
+	newUser.save((err) => { 
 		if (err) {
 		    res.type('html').status(200);
 		    res.write('uh oh: ' + err);
@@ -59,10 +55,9 @@ app.use('/adduser', (req,res)=>{
 		    // display the "successfull created" message
 		    res.send('successfully added ' + newUser + ' to the database');
 		}
-
-
 });
-    res.redirect('/all');
+// res.redirect('/addUserForm.html');
+
 });
 
 
