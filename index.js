@@ -167,37 +167,6 @@ app.use('/edit_item_owner', (req, res) => {
 	}
 });
 
-/*app.use('/add_item', (req, res) => {
-	// construct the Item from the form data which is in the request body
-	var newItem = new Item ({
-		type: req.body.type,
-	    id: itemIDCounter,
-      	expDate: req.body.expDate,
-      	dateAdded: req.body.dateAdded
-	    });
-	console.log(newItem);
-	itemIDCounter++;
-
-	//make fridge ID a variable later
-	var filter = { 'id' : 0 };
-	var action = { '$push' : { 'items' : newItem } };
-
-	// save the item to the database
-	Fridge.findOneAndUpdate( filter, action, (err, orig) => {
-		if (err) {
-		    res.type('html').status(200);
-		    res.write('uh oh: ' + err);
-		    console.log(err);
-		    res.end();
-		}
-		else {
-		    // display the "successfull created" message
-		    res.send('Successfully added ' + newItem.type + ' to the database');
-		}
-	    } );
-    });
-*/
-
 //adds the item directly to the database
 app.use('/add_item', (req, res) => {
 	// construct the Item from the form data which is in the request body
@@ -207,7 +176,8 @@ app.use('/add_item', (req, res) => {
 		dateAdded: req.body.dateAdded,
 		user: null,
 		inFridge: 0,
-		id: Date.now() / 60
+		id: Date.now()/60,
+		note: [req.body.note, req.body.public=='yes']
 		});
 	console.log(newItem);
 	itemIDCounter++;
@@ -222,7 +192,10 @@ app.use('/add_item', (req, res) => {
 		}
 		else {
 			// display the "successfull created" message
-			res.send('Successfully added ' + newItem.type + ' to the database');
+			res.type('html').status(200);
+			res.write('Successfully added ' + newItem.type + ' to the database');
+			res.write("<br><a href=\"/public/addItemForm.html\">Click here to add another item</a>");
+			res.end()
 		}
 		} );
 	});
@@ -245,7 +218,7 @@ app.use('/all', (req, res) => {
 			if (fridges.length == 0)
 			{
 				res.type('html').status(200);
-				res.write('There are no fridges');
+				res.write('There are no items');
 				res.end();
 				return;
 			}
@@ -317,8 +290,9 @@ app.use('/show_expired', (req, res) => {
 					if(item.expDate < Date.now()) {
 						res.write('<li>');
 						//res.write('Type: ' + fridge.items[count].type + '; Id: ' + fridge.items[count].id + '; Expiration Date: ' + fridge.items[count].expDate);
-						res.write(item.type + ' expired on ' + (item.expDate).toDateString() + '; belongs to: (add later)');
-	
+						res.write(item.type + ' expired on ' + (item.expDate).toDateString());
+						res.write('<br>&emsp;Belongs to: ' + item.user);
+						res.write('<br>&emsp;Note: ' + item.note[0]);
 						res.write('</li>');
 					}
 					res.write('</ul>');
@@ -328,7 +302,7 @@ app.use('/show_expired', (req, res) => {
 			}
 		}
 
-	}).sort({ 'expDate': 'asc'});//doesn't work, but figure out how to sort
+	}).sort({'expDate': 'asc'});
 
 });
 
