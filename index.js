@@ -12,31 +12,18 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // import the Item, Person, and Fridge
 var Item = require('./Item.js');
 var User = require('./User.js');
-var Fridge = require('./Fridge.js');
+//var Fridge = require('./Fridge.js');
 const { json } = require('express/lib/response');
-
-//used to give each item added a unique ID
-var itemIDCounter = 0
 
 //give user an id based
 var userID = Date.now()
 
-//dummy user - when we get to multiple users, this should change somehow
-var user1 = new User ({
-	name: 'Bryn Mawr',
-	id: 0,
-  roomNumber: 1,
-  myItems: []
+//redirects to the add user form
+app.use('/add_user', (req,res)=> {
+	res.redirect('/public/addUserForm.html');
 });
 
-//dummy fridge
-var fridge1 = new Fridge ({
-	id: 0,
-	users: [],
-	items: []
-});
-
-//add user
+//add user to the database
 app.use('/adduser', (req,res)=>{
 	var newUser = new User({
 		name: req.body.name,
@@ -167,20 +154,21 @@ app.use('/edit_item_owner', (req, res) => {
 	}
 });
 
-//adds the item directly to the database
+//adds the item to the database (MJ)
 app.use('/add_item', (req, res) => {
 	// construct the Item from the form data which is in the request body
 	var newItem = new Item ({
-		type: req.body.type,
-		expDate: new Date(req.body.expDate),
-		dateAdded: req.body.dateAdded,
-		user: null,
-		inFridge: 0,
-		id: Date.now()/60,
-		note: [req.body.note, req.body.public=='yes']
+		type: req.body.type,				//the type/name of the food item
+		expDate: new Date(req.body.expDate),//the expiration date
+		//the date the item was added - current date if 'today' was checked, otherwise the specified date
+		dateAdded:((req.body.today=='yes') ? Date.now() : req.body.dateAdded),
+		user: null,							//the user associated with it - null if added from the web
+		inFridge: 0,						//the fridge the item is in - all in fridge 0 right now
+		id: Date.now()/60,					//the ID of the item
+		//any note associated with the item, true if it's public and false if private
+		note: [req.body.note, req.body.public=='yes']	
 		});
 	console.log(newItem);
-	itemIDCounter++;
 
 	// save the item to the database
 	newItem.save( (err) => {
@@ -261,48 +249,47 @@ app.use('/all', (req, res) => {
 	}).sort({ "id": 'asc'});//sorts by id
 });
 
+//Shows all the expired items in the fridges and some info about them (MJ)
 app.use('/show_expired', (req, res) => {
 
+	//gets all Item objects in the datebase
 	Item.find({}, (err, items) => {
 
-		if (err)
-		{
+		if (err) {
 			res.type('html').status(200);
 			console.log('uh oh: ' + err);
 			res.write(err);
-		}else
-		{
-			if (items.length == 0)
-			{
+		} else {
+			if (items.length == 0) {
+				//no items
 				res.type('html').status(200);
-				res.write('There are no fridges');
+				res.write('There are no items');
 				res.end();
 				return;
-			}
-			else{
+			} else{
 				
 				res.type('html').status(200);
 				res.write('Expired items in your fridges:<br>');
 				
+				res.write('<ul>');
+				//for each item, check if the expiration date is after the current date
 				items.forEach( (item) => {
-					var count = 0;
-					res.write('<ul>');
 					if(item.expDate < Date.now()) {
 						res.write('<li>');
-						//res.write('Type: ' + fridge.items[count].type + '; Id: ' + fridge.items[count].id + '; Expiration Date: ' + fridge.items[count].expDate);
 						res.write(item.type + ' expired on ' + (item.expDate).toDateString());
 						res.write('<br>&emsp;Belongs to: ' + item.user);
-						res.write('<br>&emsp;Note: ' + item.note[0]);
+						//if there's a note, display it; otherwise, say 'No note'
+						res.write(';&emsp;' + ((item.note[0]!=undefined && item.note[0]!='') ? 'Note: ' + item.note[0] : 'No note'));
 						res.write('</li>');
 					}
-					res.write('</ul>');
 				});
+				res.write('</ul>');
 				
 				res.end();
 			}
 		}
 
-	}).sort({'expDate': 'asc'});
+	}).sort({'expDate': 'asc'}); //sort by the expiration date in ascending order
 
 });
 
@@ -334,18 +321,11 @@ app.use('/delete', (req, res) => {
 
 
 
-/* From Lab7 index.js so I can test /create */
-// endpoint for accessing data via the web api
-// to use this, make a request for /api to get an array of all Fridge objects and items in them
-// or /api?name=[whatever] to get a single object
+//unformatted print of Items to test functions
 app.use('/api', (req, res) => {
 
 	// construct the query object
 	var queryObject = {};
-	if (req.query.id) {
-	    // if there's a name in the query parameter, use it here
-	    queryObject = { "id" : req.query.id };
-	};
 
 	Item.find( queryObject, (err, items) => {
 		console.log(items);
@@ -361,14 +341,14 @@ app.use('/api', (req, res) => {
 		    var item = items[0];
 		    // send back a single JSON object
 		    //res.json( { "type" : item.type, "id" : item.id , "expDate" : item.expDate, "dateAdded" : item.dateAdded } );
-			res.json( { 'type' : item.type, 'expDate' : (item.expDate).toDateString() } );
+			res.json( { 'type' : item.type, 'expDate' : (item.expDate).toDateString(), 'date Added' : (item.dateAdded).toDateString() } );
 		}
 		else {
 		    // construct an array out of the result
 		    var returnArray = [];
 		    items.forEach( (item) => {
 			    //returnArray.push( { "type" : item.type, "id" : item.id , "expDate" : item.expDate, "dateAdded" : item.dateAdded } );
-				returnArray.push( { 'type' : item.type, 'expDate' : (item.expDate).toDateString() } );
+				returnArray.push( { 'type' : item.type, 'expDate' : (item.expDate).toDateString(), 'date Added' : (item.dateAdded).toDateString() } );
 			});
 		    // send it back as JSON Array
 		    res.json(returnArray);
@@ -381,24 +361,9 @@ app.use('/api', (req, res) => {
 
 app.use('/public', express.static('public'));
 
-//register a fridge that items will get added to if needed and redirect to the form to add
+//Redirect to the form to add
 app.use('/', (req, res) => {
-	/*//add a base fridge to the database if one doesn't already exist
-	Fridge.find( (err, allFridges) => {
-		if (err) {
-			console.log(err);
-		} else if (allFridges.length == 0) {
-			fridge1.save( (err) => {
-				if (err) {
-					//res.type('html').status(200);
-					//res.write('uh oh: ' + err);
-					console.log(err);
-					//res.end();
-				}
-			});
-		}
-	});*/
-
+	//CHANGE TO REDIRECTING TO HOME PAGE
 	res.redirect('/public/addItemForm.html');
 });
 

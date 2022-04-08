@@ -1,12 +1,19 @@
+<!--Form for adding an item to the database/fridge
+    Can specify the item type, expriation date, date added,
+      and a note (public or private). Not able to associate
+      the item with an individual user-->
+
 <html>
     <form action="/add_item" method="post">
         Type: <input name="type"><p>
         Expiration Date: <input name="expDate"><p>
-        Date Added: <input name="dateAdded"><p>
+        Date Added: <label for="today">
+            <input type="checkbox" id="today" name="today" value="yes">  Today
+        </label>, Other: <input name="dateAdded"><p>
         Note: <input name="note">
         <label for="public">
             <input type="checkbox" id="public" name="public" value="yes">  Public (default is private)
-         </label><p>
+        </label><p>
         <input type="submit" value="Add item!">
     </form>
 </html>
