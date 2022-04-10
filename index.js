@@ -1,18 +1,22 @@
 /* Main file for Expir-ational Project
  * Maya Johnson, Ashley Park, Jasmine Lei, Rosie Arasa
  * ---------------------------------------------------
- * List of endpoints
+ * List of endpoints (in order of appearance in the code)
  *   ~ /add_user:  (not necessary?  we can just link the form on the home page)
  *   ~ /adduser:
  *   ~ /removeuser:
- *   ~ /edit_item_expDate:
- *   ~ /edit_item_owner:
- *   ~ /add_item:
+ *   ~ /edit_item_expDate_request (JL): writes an html form to get new expDate
+ *   ~ /edit_item_owner_request (JL): writes an html form to get new owner
+ *   ~ /edit_item_anonymity_request (JL): writes an html form to get new anon.
+ *   ~ /edit_item_expDate (JL): changes expDate according to html form
+ *   ~ /edit_item_owner (JL): changes owner according to html form
+ *   ~ /edit_item_anonymity (JL): toggle anonymity according to html form
+ *   ~ /add_item (MJ):
  *   ~ /all:
- *   ~ /show_expired:
+ *   ~ /show_expired (MJ):
  *   ~ /delete:
  *   ~ /api:
- *   ~ /home: links to all other web pages
+ *   ~ /home (JL): links to all other web pages
  */
 
 
@@ -82,107 +86,238 @@ app.use('/removeuser', (req, res) => {
     res.redirect('/all');
 });
 
-// edit iterface
-app.use('/edit_items', (req, res) => {
-	res.type('html');
-	res.write('<label for=\"items\">Choose an item:</label>');
-	res.write('<select name="items" id="items">');
-	// Person.find( {}, (err, persons) => {
-	//
-	// });sort({ 'type': 'asc' }); // this sorts them BEFORE rendering the results
-  res.write('<option value=\"volvo\">Volvo</option>');
-  // <option value="saab">Saab</option>
-  // <option value="mercedes">Mercedes</option>
-  // <option value="audi">Audi</option>
-	res.write('</select>');
-	res.send();
+// interface to edit expDate (JL)
+app.use('/edit_item_expDate_request', (req, res) => {
+	Item.find( {}, (err, items) => {
+		if (err) {
+	    res.type('html').status(200);
+	    console.log('uh oh' + err);
+	    res.write(err);
+		} else if (items.length == 0) {
+				res.type('html').status(200);
+				res.write('There are no items to edit.<br><br>');
+				res.write('<a href=\"/home\">Go back to Home</a>');
+				res.end();
+				return;
+		} else {
+			// write an html form
+			res.type('html').status(200);
+			res.write('<form action=\"/edit_item_expDate\" method=\"post\">');
+
+			// choose an item
+			res.write('<label for=\"item\">Choose an item:</label>');
+			res.write('<select name=\"id\" id=\"item\">');
+			items.forEach( (item) => {
+				// only display name of item, for now
+				res.write('<option value=\"' + item._id + '\">' + item.type + '</option>');
+			});
+			res.write('</select><p>');
+
+			// enter new expDate
+			res.write('New Expiration Date: <input name=\"expDate\"><p>');
+
+			res.write('<input type=\"submit\" value=\"Edit Item!\">');
+			res.write('</form><br>');
+			res.write('<a href=\"/home\">Go back to Home</a>');
+			res.send();
+		}
+	});
+});
+
+// interface to edit owner (JL)
+app.use('/edit_item_owner_request', (req, res) => {
+	Item.find( (err, items) => {
+		if (err) {
+	    res.type('html').status(200);
+	    console.log('uh oh' + err);
+	    res.write(err);
+		} else if (items.length == 0) {
+				res.type('html').status(200);
+				res.write('There are no items to edit.<br><br>');
+				res.write('<a href=\"/home\">Go back to Home</a>');
+				res.end();
+				return;
+		} else {
+			// write an html form
+			res.type('html').status(200);
+			res.write('<form action=\"/edit_item_owner\" method=\"post\">');
+
+			// choose an item
+			res.write('<label for=\"item\">Choose an item:</label>');
+			res.write('<select name=\"id\" id=\"item\">');
+			items.forEach( (item) => {
+				// only display name of item, for now
+				res.write('<option value=\"' + item._id + '\">' + item.type + '</option>');
+			});
+			res.write('</select><p>');
+
+			// choose a user
+			res.write('<label for=\"user\">New owner:</label>');
+			res.write('<select name=\"owner\" id=\"user\">');
+			User.find( (err, users) => {
+				if (err) {
+			    res.type('html').status(200);
+			    console.log('uh oh' + err);
+			    res.write(err);
+				} else if (items.length == 0) {
+						res.type('html').status(200);
+						res.write('There are no users to edit.<br><br>');
+						res.write('<a href=\"/home\">Go back to Home</a>');
+						res.end();
+						return;
+				} else {
+					users.forEach( (user) => {
+						// only display name of user, for now
+						res.write('<option value=\"' + user._id + '\">' + user.name + '</option>');
+					});
+				}
+			});
+			res.write('</select><p>');
+
+			res.write('<input type=\"submit\" value=\"Edit Item!\">');
+			res.write('</form><br>');
+			res.write('<a href=\"/home\">Go back to Home</a>');
+			res.send();
+		}
+	});
+});
+
+// interface to edit anonymity (JL)
+app.use('/edit_item_anonymity_request', (req, res) => {
+	Item.find( {}, (err, items) => {
+		if (err) {
+			res.type('html').status(200);
+			console.log('uh oh' + err);
+			res.write(err);
+		} else if (items.length == 0) {
+				res.type('html').status(200);
+				res.write('There are no items to edit.<br><br>');
+				res.write('<a href=\"/home\">Go back to Home</a>');
+				res.end();
+				return;
+		} else {
+			// write an html form
+			res.type('html').status(200);
+			res.write('<form action=\"/edit_item_anonymity\" method=\"post\">');
+
+			// choose an item
+			res.write('<label for=\"item\">Choose an item:</label>');
+			res.write('<select name=\"id\" id=\"item\">');
+			items.forEach( (item) => {
+				// only display name of item, for now
+				res.write('<option value=\"' + item._id + '\">' + item.type + '</option>');
+			});
+			res.write('</select><p>');
+
+			// enter new anonymity value
+			// choose an item
+			res.write('<label for=\"anonymous\">Anonymous?: </label>');
+			res.write('<select name=\"anonymous\" id=\"anonymous\">');
+			res.write('<option value=\"true\">yes</option>');
+			res.write('<option value=\"false\">no</option>');
+
+			res.write('</select><p>');
+
+			res.write('<input type=\"submit\" value=\"Edit Item!\">');
+			res.write('</form><br>');
+			res.write('<a href=\"/home\">Go back to Home</a>');
+			res.send();
+		}
+	});
 });
 
 // edit item expDate field (JL)
 app.use('/edit_item_expDate', (req, res) => {
-	var id = req.query.id;
-	var expDate = req.query.expDate;
+	var id = req.body.id;
+	var expDate = req.body.expDate;
 	if (id) {
+		res.type('html');
 		var filter = {'_id' : id};
 		console.log("look for id: " + id);
 		if (expDate) {
 			var action = {'$set' : {'expDate' : expDate}};
 			Item.findOneAndUpdate(filter, action, (err, orig) => {
 				if (err) {
-					console.log('error: ' + err);
-					res.json({'status' : err});
+					res.send('error: ' + err);
 				} else if (!orig) {
 					// no item in database found with matching id
-					console.log('error: item not found');
-				 	res.json({'status' : 'item not found'});
+				 	res.send('error: item not found');
+				} else {
+					res.write('Successfully updated the expiration date of ' + orig.type + '<br><br>');
+					res.write('<a href=\"/home\">Go back to Home</a>');
+					res.send();
 				}
 			});
 		} else {
 			// no new info given
-			res.json({'status' : 'no update to expDate'});
+			res.send('no update to expDate');
 		}
 	} else {
 		// no id given, cannot find item
 		console.log('error: no item id given');
-		res.redirect('/all');
+		res.redirect('/home');
 	}
 });
 
-// edit item's owner (JL)
-// owner currently must be an id, not a name
+// edit item's user field (JL)
 app.use('/edit_item_owner', (req, res) => {
-	var id = req.query.id;
-	var owner = req.query.owner;  // an ID, not a name, currently
+	var id = req.body.id;
+	var owner = req.body.owner;  // an ID, not a name, currently
 	if (id) {
+		res.type('html');
+		var filter = {'_id' : id};
+		console.log("look for id: " + id);
 		if (owner) {
-			// find item first
-			var filter = {'_id' : id};
-			var item;
-			Item.findOne(filter, (err, it) => {
+			var action = {'$set' : {'user' : owner}};
+			Item.findOneAndUpdate(filter, action, (err, orig) => {
 				if (err) {
-					console.log('error: '  + err);
-					res.json({'status' : err});
-				} else if (!it) {
-					console.log('error: item not found');
-					res.json({'status' : 'item not found'});
-				} else {
-					item = it;
-				}
-			});
-			// delete item from old user's list
-			filter = {'myItems' : {'_id' : id}};
-			var action = {'$pull' : {'myItems' : {'_id' : id}}};
-			User.findOneAndUpdate(filter, action, (err, orig) => {
-				if (err) {
-					console.log('error: '  + err);
-					res.json({'status' : err});
-				} else if (!orig) {
-					// no user with item found
-					console.log('error: old user not found');
-					res.json({'status' : 'old user not found'});
-				}
-			});
-			// add item to new user's list
-			filter = {'_id' : owner};
-			action = {'$push' : {'myItems' : item}};
-			User.findOneAndUpdate(filter, action, (err, orig) => {
-				if (err) {
-					console.log('error: '  + err);
-					res.json({'status' : err});
+					res.send('error: ' + err);
 				} else if (!orig) {
 					// no item in database found with matching id
-					console.log('error: new user not found');
-					res.json({'status' : 'new user not found'});
+					res.send('error: item not found');
+				} else {
+					res.write('Successfully updated the owner of ' + item.type + '<br>');
+					res.write('<a href=\"/home\">Go back to Home</a>');
+					res.send();
 				}
 			});
 		} else {
 			// no new info given
-			res.json({'status' : 'no update to owner'});
+			res.send('no update to owner');
 		}
 	} else {
 		// no id given, cannot find item
 		console.log('error: no item id given');
-		res.redirect('/all');
+		res.redirect('/home');
+	}
+});
+
+// edit item anonymous field (JL
+// even if anonymous is undefined, the field will still be set (undefined == false)
+app.use('/edit_item_anonymity', (req, res) => {
+	var id = req.body.id;
+	var anonymous = req.body.anonymous;
+	if (id) {
+		res.type('html');
+		var filter = {'_id' : id};
+		console.log("look for id: " + id);
+		var action = {'$set' : {'anonymous' : anonymous}};
+		Item.findOneAndUpdate(filter, action, (err, orig) => {
+			if (err) {
+				res.send('error: ' + err);
+			} else if (!orig) {
+				// no item in database found with matching id
+			 	res.send('error: item not found');
+			} else {
+				res.write('Successfully updated the anonymity of ' + orig.type + '<br><br>');
+				res.write('<a href=\"/home\">Go back to Home</a>');
+				res.send();
+			}
+		});
+	} else {
+		// no id given, cannot find item
+		console.log('error: no item id given');
+		res.redirect('/home');
 	}
 });
 
@@ -388,44 +523,56 @@ app.use('/api', (req, res) => {
 
 // home page with links to other pages
 app.use('/home', (req, res) => {
-			res.type('html');
-			res.write('Welcome to the Fridge!');
-			res.write('<ul>');
+	res.type('html');
+	res.write('Welcome to the Fridge!');
+	res.write('<ul>');
 
-			res.write('Manage Users:')
-			res.write('<ul>');
-			// add user form
-	    res.write('<li>');
-	    res.write(" <a href=\"/public/addUserForm.html" + "\">Add User</a>");
-	    res.write('</li>');
-			// remove user ===========
+	res.write('Manage Users:')
+	res.write('<ul>');
+	// add user form
+  res.write('<li>');
+  res.write(" <a href=\"/public/addUserForm.html" + "\">Add User</a>");
+  res.write('</li>');
+	// remove user ===========
 
-			res.write('</ul>');
+	res.write('</ul>');
 
-			res.write('Manage Items:')
-			res.write('<ul>');
-			// add item form
-			res.write('<li>');
-			res.write(" <a href=\"/public/addItemForm.html" + "\">Add Item</a>");
-			res.write('</li>');
-			// remove item ===========
-			// edit item ===========
-			res.write('</ul>');
+	res.write('Manage Items:')
+	res.write('<ul>');
+	// add item form
+	res.write('<li>');
+	res.write(" <a href=\"/public/addItemForm.html" + "\">Add Item</a>");
+	res.write('</li>');
+	// remove item ===========
+	// edit item expDate
+	res.write('<li>');
+	res.write(" <a href=\"/edit_item_expDate_request" + "\">Edit Item Expiration Date</a>");
+	res.write('</li>');
+	// edit item owner
+	res.write('<li>');
+	res.write(" <a href=\"/edit_item_owner_request" + "\">Edit Item Owner</a>");
+	res.write('</li>');
+	// edit item anonymity
+	res.write('<li>');
+	res.write(" <a href=\"/edit_item_anonymity_request" + "\">Edit Item Anonymity</a>");
+	res.write('</li>');
 
-			res.write('View Data:')
-			res.write('<ul>');
-			// all items
-			res.write('<li>');
-			res.write(" <a href=\"/all" + "\">All Items</a>");
-			res.write('</li>');
-			// expired items
-			res.write('<li>');
-			res.write(" <a href=\"/show_expired" + "\">Expired Items</a>");
-			res.write('</li>');
-			res.write('</ul>');
+	res.write('</ul>');
 
-			res.write('</ul>');
-			res.send();
+	res.write('View Data:')
+	res.write('<ul>');
+	// all items
+	res.write('<li>');
+	res.write(" <a href=\"/all" + "\">All Items</a>");
+	res.write('</li>');
+	// expired items
+	res.write('<li>');
+	res.write(" <a href=\"/show_expired" + "\">Expired Items</a>");
+	res.write('</li>');
+	res.write('</ul>');
+
+	res.write('</ul>');
+	res.send();
 });
 
 
