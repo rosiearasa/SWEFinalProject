@@ -1,4 +1,4 @@
-/* User object - represents a user of the fridge and the items they have in it */
+/* User object - represents a user of the fridge, does not store items */
 
 var mongoose = require('mongoose');
 
@@ -15,7 +15,7 @@ var userSchema = new Schema({
     // myItems: []
     });
 
-// export itemSchema as a class called Item
+// export userSchema as a class called User
 module.exports = mongoose.model('User', userSchema);
 
 userSchema.methods.standardizeName = function() {

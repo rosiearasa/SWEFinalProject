@@ -1,5 +1,21 @@
-//Main file for Expir-ational Project
-//Maya Johnson, Ashley Park, Jasmine Lei, Rosie Arasa
+/* Main file for Expir-ational Project
+ * Maya Johnson, Ashley Park, Jasmine Lei, Rosie Arasa
+ * ---------------------------------------------------
+ * List of endpoints
+ *   ~ /add_user:  (not necessary?  we can just link the form on the home page)
+ *   ~ /adduser:
+ *   ~ /removeuser:
+ *   ~ /edit_item_expDate:
+ *   ~ /edit_item_owner:
+ *   ~ /add_item:
+ *   ~ /all:
+ *   ~ /show_expired:
+ *   ~ /delete:
+ *   ~ /api:
+ *   ~ /home: links to all other web pages
+ */
+
+
 
 // set up Express
 var express = require('express');
@@ -31,7 +47,7 @@ app.use('/adduser', (req,res)=>{
 });
 console.log(newUser)
 // //save the person to the database
-	newUser.save((err) => { 
+	newUser.save((err) => {
 		if (err) {
 		    res.type('html').status(200);
 		    res.write('uh oh: ' + err);
@@ -64,6 +80,22 @@ app.use('/removeuser', (req, res) => {
 	})
 
     res.redirect('/all');
+});
+
+// edit iterface
+app.use('/edit_items', (req, res) => {
+	res.type('html');
+	res.write('<label for=\"items\">Choose an item:</label>');
+	res.write('<select name="items" id="items">');
+	// Person.find( {}, (err, persons) => {
+	//
+	// });sort({ 'type': 'asc' }); // this sorts them BEFORE rendering the results
+  res.write('<option value=\"volvo\">Volvo</option>');
+  // <option value="saab">Saab</option>
+  // <option value="mercedes">Mercedes</option>
+  // <option value="audi">Audi</option>
+	res.write('</select>');
+	res.send();
 });
 
 // edit item expDate field (JL)
@@ -166,7 +198,7 @@ app.use('/add_item', (req, res) => {
 		inFridge: 0,						//the fridge the item is in - all in fridge 0 right now
 		id: Date.now()/60,					//the ID of the item
 		//any note associated with the item, true if it's public and false if private
-		note: [req.body.note, req.body.public=='yes']	
+		note: [req.body.note, req.body.public=='yes']
 		});
 	console.log(newItem);
 
@@ -211,12 +243,12 @@ app.use('/all', (req, res) => {
 				return;
 			}
 			else{
-				
+
 				res.type('html').status(200);
 				res.write('Here are the items in the database:<br>');
 				res.write(" <a href=\"/show_expired\">[Expired Items]</a>");
 				// show all the items
-				
+
 				fridges.forEach( (fridge) => {
 					res.write('<br><br>')
 					res.write('Fridge #' + fridge.id + ':');
@@ -230,7 +262,7 @@ app.use('/all', (req, res) => {
 					{
 						res.write('<li>');
 						res.write('Type: ' + fridge.items[count].type + '; Id: ' + fridge.items[count].id + '; Expiration Date: ' + fridge.items[count].expDate);
-	
+
 						// this creates a link to the /delete endpoint
 						res.write(" <a href=\"/delete?id=" + fridge.items[0].id + "\">[Delete]</a>");
 						res.write('</li>');
@@ -240,8 +272,8 @@ app.use('/all', (req, res) => {
 					res.write('</ul>');
 					res.write('</ul>');
 				});
-				
-				
+
+
 				res.end();
 			}
 		}
@@ -267,10 +299,10 @@ app.use('/show_expired', (req, res) => {
 				res.end();
 				return;
 			} else{
-				
+
 				res.type('html').status(200);
 				res.write('Expired items in your fridges:<br>');
-				
+
 				res.write('<ul>');
 				//for each item, check if the expiration date is after the current date
 				items.forEach( (item) => {
@@ -284,7 +316,7 @@ app.use('/show_expired', (req, res) => {
 					}
 				});
 				res.write('</ul>');
-				
+
 				res.end();
 			}
 		}
@@ -317,9 +349,6 @@ app.use('/delete', (req, res) => {
 	    } );
 
 	});
-
-
-
 
 //unformatted print of Items to test functions
 app.use('/api', (req, res) => {
@@ -357,14 +386,55 @@ app.use('/api', (req, res) => {
 	    });
     });
 
+// home page with links to other pages
+app.use('/home', (req, res) => {
+			res.type('html');
+			res.write('Welcome to the Fridge!');
+			res.write('<ul>');
+
+			res.write('Manage Users:')
+			res.write('<ul>');
+			// add user form
+	    res.write('<li>');
+	    res.write(" <a href=\"/public/addUserForm.html" + "\">Add User</a>");
+	    res.write('</li>');
+			// remove user ===========
+
+			res.write('</ul>');
+
+			res.write('Manage Items:')
+			res.write('<ul>');
+			// add item form
+			res.write('<li>');
+			res.write(" <a href=\"/public/addItemForm.html" + "\">Add Item</a>");
+			res.write('</li>');
+			// remove item ===========
+			// edit item ===========
+			res.write('</ul>');
+
+			res.write('View Data:')
+			res.write('<ul>');
+			// all items
+			res.write('<li>');
+			res.write(" <a href=\"/all" + "\">All Items</a>");
+			res.write('</li>');
+			// expired items
+			res.write('<li>');
+			res.write(" <a href=\"/show_expired" + "\">Expired Items</a>");
+			res.write('</li>');
+			res.write('</ul>');
+
+			res.write('</ul>');
+			res.send();
+});
+
 
 
 app.use('/public', express.static('public'));
 
 //Redirect to the form to add
 app.use('/', (req, res) => {
-	//CHANGE TO REDIRECTING TO HOME PAGE
-	res.redirect('/public/addItemForm.html');
+	res.redirect('/home');
 });
 
 app.listen(3000,  () => {
