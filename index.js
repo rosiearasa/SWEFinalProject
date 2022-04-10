@@ -361,7 +361,7 @@ app.use('/all', (req, res) => {
 	// find all the item objects in the database
 		//can later expand to fridges/users
 
-	Fridge.find({}, (err, fridges) => {
+	Item.find({}, (err, items) => {
 
 		if (err)
 		{
@@ -370,7 +370,7 @@ app.use('/all', (req, res) => {
 			res.write(err);
 		}else
 		{
-			if (fridges.length == 0)
+			if (items.length == 0)
 			{
 				res.type('html').status(200);
 				res.write('There are no items');
@@ -384,30 +384,41 @@ app.use('/all', (req, res) => {
 				res.write(" <a href=\"/show_expired\">[Expired Items]</a>");
 				// show all the items
 
-				fridges.forEach( (fridge) => {
-					res.write('<br><br>')
-					res.write('Fridge #' + fridge.id + ':');
-
-					var length = fridge.items.length;
-					var count = 0;
+				res.write('<br><br>')
 					res.write('<ul>');
 					res.write('<li>Items:</li>')
 					res.write('<ul>');
-					while (count < length)
+
+				
+
+				items.forEach((item) => {
+
+					var username = ' ';
+					if (item.user && item.user.name)
 					{
-						res.write('<li>');
-						res.write('Type: ' + fridge.items[count].type + '; Id: ' + fridge.items[count].id + '; Expiration Date: ' + fridge.items[count].expDate);
+						username = item.user.name;
+					}
+
+					var roomNum = -1;
+					if (item.user && item.user.roomNumber)
+					{
+						roomNum = item.user.roomNumber;
+					}
+
+					var anonymous = 'False';
+
+					if (item.anonymous)
+					{
+						anonymous = 'True';
+					}
+					
+					res.write('<li>');
+						res.write('Type: ' + item.type + '; Expriation Date: ' + item.expDate + '; Date Added: ' + item.dateAdded + '; Owner: ' + username + '; Room Number: ' + roomNum + '; Anonymity: ' + anonymous);
 
 						// this creates a link to the /delete endpoint
-						res.write(" <a href=\"/delete?id=" + fridge.items[0].id + "\">[Delete]</a>");
+						res.write(" <a href=\"/delete?id=" + item.id + "\">[Delete]</a>");
 						res.write('</li>');
-						count = count + 1;
-
-					}
-					res.write('</ul>');
-					res.write('</ul>');
 				});
-
 
 				res.end();
 			}
@@ -465,23 +476,22 @@ app.use('/delete', (req, res) => {
 	if (!req.query.id)
 	{
 		console.log('error: id does not exist in url');
+		res.end();
 	}
 
-	var filter = {'id': 0};
-	var action = {'$pull': {id: req.query.id }}
 
-	Fridge.findOneAndUpdate( filter, action, (err, orig) => {
-		if (err) {
-		    res.type('html').status(200);
-		    res.write('uh oh: ' + err);
-		    console.log(err);
-		    res.end();
+
+	Item.findOneAndDelete( req.query.id, (err, iem) => {
+		if (err) { 
+		   res.json( { 'status' : err } ); 
+		}
+		else if (!iem) {
+		   res.json( { 'status' : 'no person' } ); 
 		}
 		else {
-		    // display the "successfull created" message
-			res.redirect('/all');
+		   res.redirect('/all');
 		}
-	    } );
+	});
 
 	});
 
