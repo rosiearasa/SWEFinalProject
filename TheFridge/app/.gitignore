@@ -45,6 +45,8 @@ tmp/**/*
 *~.nib
 .settings/
 .loadpath
+*.log
+*.jks
 
 # External tool builders
 .externalToolBuilders/
