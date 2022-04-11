@@ -10,7 +10,7 @@ var Schema = mongoose.Schema;
 
 var userSchema = new Schema({
     name: {type: String, required: true},
-    id: {type: Number, required: false, unique: true},
+    // id: {type: Number, required: false, unique: true},
     roomNumber: {type: Number, required: true},
     // myItems: []
     });
