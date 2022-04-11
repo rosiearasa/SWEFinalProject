@@ -3,8 +3,8 @@
  * ---------------------------------------------------
  * List of endpoints (in order of appearance in the code)
  *   ~ /add_user:  (not necessary?  we can just link the form on the home page)
- *   ~ /adduser:
- *   ~ /removeuser:
+ *   ~ /adduser: Add user into the database
+ *   ~ /removeuser: Remove user from the database by name
  *   ~ /edit_item_expDate_request (JL): writes an html form to get new expDate
  *   ~ /edit_item_owner_request (JL): writes an html form to get new owner
  *   ~ /edit_item_anonymity_request (JL): writes an html form to get new anon.
@@ -35,22 +35,22 @@ var User = require('./User.js');
 //var Fridge = require('./Fridge.js');
 const { json } = require('express/lib/response');
 
-//give user an id based
-var userID = Date.now()
+
 
 //redirects to the add user form
 app.use('/add_user', (req,res)=> {
 	res.redirect('/public/addUserForm.html');
 });
 
-//add user to the database
+//Construct  new person
 app.use('/adduser', (req,res)=>{
 	var newUser = new User({
 		name: req.body.name,
 		roomNumber: req.body.roomNumber,
 });
 console.log(newUser)
-// //save the person to the database
+
+// //save the user to the database
 	newUser.save((err) => {
 		if (err) {
 		    res.type('html').status(200);
@@ -58,18 +58,60 @@ console.log(newUser)
 		    console.log(err);
 		    res.end();
 		}
-				else {
+				if(!err) {
+					res.json({'status': 'success'})
 		    // display the "successfull created" message
-		    res.send('successfully added ' + newUser + ' to the database');
+		    res.send('successfully added ' + newUser.name + ' to the database');
+		
+
 		}
 });
-// res.redirect('/addUserForm.html');
+
 
 });
 
+// endpoint for showing all the people
+app.use('/allusers', (req, res) => {
+    
+	// find all the Person objects in the database
+	User.find( {}, (err, users) => {
+		if (err) {
+		    res.type('html').status(200);
+		    console.log('uh oh' + err);
+		    res.write(err);
+		}
+		else {
+		    if (users.length == 0) {
+			res.type('html').status(200);
+			res.write('There are no Users');
+			res.end();
+			return;
+		    }
+		
+		    else {
+			res.type('html').status(200);
+			res.write('Here are the Users in the database:');
+			res.write('<ul>');
+			// show all the people
+			users.forEach( (user) => {
+			    res.write('<li>');
+			    res.write('Name: ' + user.name + '; RoomNumber: ' + user.roomNumber);
+			    // this creates a link to the /delete endpoint
+			    res.write(" <a href=\"/deleteuser?name=" + user.name + "\">[Delete]</a>");
+			    res.write('</li>');
+					 
+			});
+			res.write('</ul>');
+			res.end();
+		    }
+		
+		}
+
+	    }) 
+});
 
 //remove user
-app.use('/removeuser', (req, res) => {
+app.use('/deleteuser', (req, res) => {
 	var filter = {'name': req.query.name}
 	User.findOneAndDelete(filter, (err,user)=>{
 		if (err){
@@ -83,7 +125,7 @@ app.use('/removeuser', (req, res) => {
 		}
 	})
 
-    res.redirect('/all');
+    res.redirect('/allusers');
 });
 
 // interface to edit expDate (JL)
@@ -544,7 +586,9 @@ app.use('/home', (req, res) => {
   res.write(" <a href=\"/public/addUserForm.html" + "\">Add User</a>");
   res.write('</li>');
 	// remove user ===========
-
+	res.write('<li>');
+	res.write(" <a href=\"/allusers" + "\">Remove User</a>");
+	res.write('</li>');
 	res.write('</ul>');
 
 	res.write('Manage Items:')
