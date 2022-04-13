@@ -356,20 +356,40 @@ app.use('/edit_item_anonymity', (req, res) => {
 	}
 });
 
+//reads the info from the form and passes it to /add_item
+app.use('/read_add_item_form', (req, res) => {
+
+	type = req.body.type,				//the type/name of the food item
+	expDate = new Date(req.body.expDate),//the expiration date
+	//the date the item was added - current date if 'today' was checked, otherwise the specified date
+	dateAdded =((req.body.today=='yes') ? Date.now() : req.body.dateAdded),
+	user = null,							//the user associated with it - null if added from the web
+	inFridge = 0,						//the fridge the item is in - all in fridge 0 right now
+	// id: Date.now()/60,					//the ID of the item
+	anonymous = false,      // default not anonymous
+	//any note associated with the item, true if it's public and false if private
+	note = req.body.note
+	//public = req.body.public=='yes'
+
+	let url = `/add_item?type=${type}&expDate=${expDate}&dateAdded=${dateAdded}&user=${user}&inFridge=${inFridge}&anonymous=${anonymous}&note=${note}&public=${req.body.public}`
+	res.redirect(url)
+});
+
 //adds the item to the database (MJ)
 app.use('/add_item', (req, res) => {
 	// construct the Item from the form data which is in the request body
+	console.log("got here");
 	var newItem = new Item ({
-		type: req.body.type,				//the type/name of the food item
-		expDate: new Date(req.body.expDate),//the expiration date
+		type: req.query.type,				//the type/name of the food item
+		expDate: new Date(req.query.expDate),//the expiration date
 		//the date the item was added - current date if 'today' was checked, otherwise the specified date
-		dateAdded:((req.body.today=='yes') ? Date.now() : req.body.dateAdded),
+		dateAdded:((req.query.today=='yes') ? Date.now() : req.query.dateAdded),
 		user: null,							//the user associated with it - null if added from the web
 		inFridge: 0,						//the fridge the item is in - all in fridge 0 right now
 		// id: Date.now()/60,					//the ID of the item
 		anonymous: false,      // default not anonymous
 		//any note associated with the item, true if it's public and false if private
-		note: [req.body.note, req.body.public=='yes']
+		note: [req.query.note, req.query.public=='yes']
 		});
 	console.log(newItem);
 
