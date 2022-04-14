@@ -360,7 +360,7 @@ app.use('/edit_item_anonymity', (req, res) => {
 app.use('/read_add_item_form', (req, res) => {
 
 	type = req.body.type,				//the type/name of the food item
-	expDate = new Date(req.body.expDate),//the expiration date
+	expDate = req.body.expDate,//the expiration date
 	//the date the item was added - current date if 'today' was checked, otherwise the specified date
 	dateAdded =((req.body.today=='yes') ? Date.now() : req.body.dateAdded),
 	user = null,							//the user associated with it - null if added from the web
@@ -386,8 +386,8 @@ app.use('/add_item', (req, res) => {
 		dateAdded:((req.query.today=='yes') ? Date.now() : req.query.dateAdded),
 		user: null,							//the user associated with it - null if added from the web
 		inFridge: 0,						//the fridge the item is in - all in fridge 0 right now
-		// id: Date.now()/60,					//the ID of the item
 		anonymous: false,      // default not anonymous
+		id: Date.now(),
 		//any note associated with the item, true if it's public and false if private
 		note: [req.query.note, req.query.public=='yes']
 		});
@@ -546,6 +546,8 @@ app.use('/delete', (req, res) => {
 
 //unformatted print of Items to test functions
 app.use('/api', (req, res) => {
+
+	console.log("In api");
 
 	// construct the query object
 	var queryObject = {};
