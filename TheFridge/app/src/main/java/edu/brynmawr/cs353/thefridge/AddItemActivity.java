@@ -1,5 +1,6 @@
 package edu.brynmawr.cs353.thefridge;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -16,6 +17,8 @@ import java.util.concurrent.TimeUnit;
 
 public class AddItemActivity extends AppCompatActivity {
 
+    boolean today = false;
+    boolean publicNote = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,14 +35,25 @@ public class AddItemActivity extends AppCompatActivity {
         String expDate = expDateView.getText().toString();
         Log.v("expDate",expDate);
 
+        String dateAdded = null;
+        if(today) {
+            dateAdded = (new Date()).toString();
+        } else {
+            EditText dateAddedView = (EditText) findViewById(R.id.dateAdded);
+            dateAdded = dateAddedView.getText().toString();
+        }
+        Log.v("dateAdded", dateAdded);
+
         EditText noteView = (EditText) findViewById(R.id.note);
         String note = noteView.getText().toString();
         Log.v("note",note);
 
-        addItemToDataBase(type, expDate, new Date(), note, null);
+        addItemToDataBase(type, expDate, dateAdded, note, null);
+
+        goToSubmissionPage();
     }
 
-    public void addItemToDataBase(String type, String expDate, Date dateAdded, String note, String userName) {
+    public void addItemToDataBase(String type, String expDate, String dateAdded, String note, String userName) {
 
         try {
             ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -47,7 +61,7 @@ public class AddItemActivity extends AppCompatActivity {
                     try {
                         //create the url for /add_item
                         String end = "?type="+type+"&expDate="+expDate+"&dateAdded="+dateAdded;
-                        end += String.format("&user=%s&inFridge=%d&anonymous=%b&note=%s&public=%s", null, 0, false, note, false);
+                        end += String.format("&user=%s&inFridge=%d&anonymous=%b&note=%s&public=%s", null, 0, false, note, publicNote);
                         //Log.v("url", end);
 
                         URL url = new URL("http://10.0.2.2:3000/add_item"+end);
@@ -81,5 +95,18 @@ public class AddItemActivity extends AppCompatActivity {
             e.printStackTrace();
             //tv.setText(e.toString());
         }
+    }
+
+    public void goToSubmissionPage() {
+        Intent intent = new Intent(this, AddItemSubmission.class);
+        startActivity(intent);
+    }
+
+    public void onTodayCheckboxClicked(View v) {
+        today = true;
+    }
+
+    public void onPublicCheckboxClicked(View v) {
+        publicNote = true;
     }
 }
