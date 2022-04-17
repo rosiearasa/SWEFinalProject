@@ -1,3 +1,12 @@
 <resources>
     <string name="app_name">TheFridge</string>
+    <string name="registerscreen">Register</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="registerpagetitle">Enter your details below to use the Fridge</string>
+    <string name="fullname">Full Name: </string>
+    <string name="roomnumber">Room Number: </string>
+
+    <string name="hintname">e.g Jane Doe</string>
+    <string name="hintroomnumber">e.g 205</string>
+    <string name="registersignup">Register Me!</string>
 </resources>

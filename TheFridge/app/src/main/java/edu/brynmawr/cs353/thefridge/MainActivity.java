@@ -14,11 +14,17 @@ public class MainActivity extends AppCompatActivity {
 
         //automatically redirects to the add item page - change to showing
         //  home page once created
-        moveToAddItem();
+//        moveToAddItem();
+        registerUser();
     }
 
     public void moveToAddItem() {
         Intent intent = new Intent(this, AddItemActivity.class);
+        startActivity(intent);
+    }
+
+    public void registerUser(){
+        Intent intent = new Intent (this,RegisterUserFragment.class );
         startActivity(intent);
     }
 }
