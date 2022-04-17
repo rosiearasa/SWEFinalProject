@@ -4,12 +4,15 @@
  * List of endpoints (in order of appearance in the code)
  *   ~ /adduser (RA):
  *   ~ /removeuser (RA):
+ *   ~ /allusers (RA):
  *   ~ /edit_item_expDate_request (JL): writes an html form to get new expDate
  *   ~ /edit_item_owner_request (JL): writes an html form to get new owner
  *   ~ /edit_item_anonymity_request (JL): writes an html form to get new anon.
+ *   ~ /edit_capacity_request (JL): writes an html form to get new capacity
  *   ~ /edit_item_expDate (JL): changes expDate according to html form
  *   ~ /edit_item_owner (JL): changes owner according to html form
  *   ~ /edit_item_anonymity (JL): toggle anonymity according to html form
+ *   ~ /edit_capacity (JL): edit the item limit
  *   ~ /add_item (MJ):
  *   ~ /all (AP):
  *   ~ /show_expired (MJ):
@@ -35,6 +38,9 @@ var User = require('./User.js');
 //var Fridge = require('./Fridge.js');
 const { json } = require('express/lib/response');
 
+// fridge capacity
+var capacity;
+
 //add user to the database
 app.use('/adduser', (req,res)=>{
 	var newUser = new User({
@@ -55,7 +61,7 @@ console.log(newUser)
 					res.json({'status': 'success'})
 		    // display the "successfull created" message
 		    res.send('successfully added ' + newUser.name + ' to the database');
-		
+
 
 		}
 });
@@ -65,7 +71,7 @@ console.log(newUser)
 
 // endpoint for showing all the people
 app.use('/allusers', (req, res) => {
-    
+
 	// find all the Person objects in the database
 	User.find( {}, (err, users) => {
 		if (err) {
@@ -80,7 +86,7 @@ app.use('/allusers', (req, res) => {
 			res.end();
 			return;
 		    }
-		
+
 		    else {
 			res.type('html').status(200);
 			res.write('Here are the Users in the database:');
@@ -92,15 +98,15 @@ app.use('/allusers', (req, res) => {
 			    // this creates a link to the /delete endpoint
 			    res.write(" <a href=\"/deleteuser?name=" + user.name + "\">[Delete]</a>");
 			    res.write('</li>');
-					 
+
 			});
 			res.write('</ul>');
 			res.end();
 		    }
-		
+
 		}
 
-	    }) 
+	    })
 });
 
 //remove user
@@ -261,6 +267,24 @@ app.use('/edit_item_anonymity_request', (req, res) => {
 	});
 });
 
+// interface to edit capacity (JL)
+app.use('/edit_capacity_request', (req, res) => {
+	res.type('html').status(200);
+	if (capacity) {
+		res.write("The current fridge capacity is: " + capacity + "<p>");
+	} else {
+		res.write("The current fridge capacity is: unlimited <p>");
+	}
+
+	res.write('<form action=\"/edit_capacity\" method=\"post\">');
+	// enter new capacity
+	res.write('New Capacity (# of items): <input name=\"numItems\"><p>');
+	res.write('<input type=\"submit\" value=\"Edit Capacity!\">');
+	res.write('</form><br>');
+	res.write('<a href=\"/home\">Go back to Home</a>');
+	res.send();
+});
+
 // edit item expDate field (JL)
 app.use('/edit_item_expDate', (req, res) => {
 	var id = req.body.id;
@@ -356,6 +380,23 @@ app.use('/edit_item_anonymity', (req, res) => {
 	}
 });
 
+// edit the item limit of the fridge
+app.use('/edit_capacity', (req, res) => {
+	res.type('html');
+	var numItems = req.body.numItems;
+	if (!numItems || isNaN(numItems)) {
+		res.write("Invalid number, no update to capacity.<p>");
+		res.write('<a href=\"/home\">Go back to Home</a>');
+		console.log("capacity: " + capacity);
+	} else {
+		capacity = numItems;
+		res.write("Successfully changed the fridge capacity to " + capacity + " items.<p>");
+		res.write('<a href=\"/home\">Go back to Home</a>');
+		console.log("capacity: " + capacity);
+	}
+	res.send();
+});
+
 //reads the info from the form and passes it to /add_item
 app.use('/read_add_item_form', (req, res) => {
 
@@ -379,37 +420,47 @@ app.use('/read_add_item_form', (req, res) => {
 app.use('/add_item', (req, res) => {
 	// construct the Item from the form data which is in the request body
 	console.log("got here");
-	var newItem = new Item ({
-		type: req.query.type,				//the type/name of the food item
-		expDate: new Date(req.query.expDate),//the expiration date
-		//the date the item was added - current date if 'today' was checked, otherwise the specified date
-		dateAdded:((req.query.today=='yes') ? Date.now() : req.query.dateAdded),
-		user: null,							//the user associated with it - null if added from the web
-		inFridge: 0,						//the fridge the item is in - all in fridge 0 right now
-		anonymous: false,      // default not anonymous
-		id: Date.now(),
-		//any note associated with the item, true if it's public and false if private
-		note: [req.query.note, req.query.public=='yes']
-		});
-	console.log(newItem);
-
-	// save the item to the database
-	newItem.save( (err) => {
+	res.type('html').status(200);
+	Item.countDocuments( (err, count) => {
 		if (err) {
-			res.type('html').status(200);
-			res.write('uh oh: ' + err);
-			console.log(err);
+			console.log("error: " + err);
+			res.send("Error counting items.");
+		} else if (count >= capacity) {
+			res.write("Fridge is full:<br>There are " + count + " items, with a " + capacity + "-item limit.<br>No new item added.");
+			res.write("<br><br><a href=\"/home\">Go back to Home</a>");
 			res.end();
-		}
-		else {
-			// display the "successfull created" message
-			res.type('html').status(200);
-			res.write('Successfully added ' + newItem.type + ' to the database');
-			res.write("<br><a href=\"/public/addItemForm.html\">Click here to add another item</a>");
-			res.end()
-		}
-		} );
-	});
+		} else {
+			var newItem = new Item ({
+				type: req.query.type,				//the type/name of the food item
+				expDate: new Date(req.query.expDate),//the expiration date
+				//the date the item was added - current date if 'today' was checked, otherwise the specified date
+				dateAdded:((req.query.today=='yes') ? Date.now() : req.query.dateAdded),
+				user: null,							//the user associated with it - null if added from the web
+				inFridge: 0,						//the fridge the item is in - all in fridge 0 right now
+				anonymous: false,      // default not anonymous
+				id: Date.now(),
+				//any note associated with the item, true if it's public and false if private
+				note: [req.query.note, req.query.public=='yes']
+				});
+			console.log(newItem);
+
+			// save the item to the database
+			newItem.save( (err) => {
+				if (err) {
+					res.write('uh oh: ' + err);
+					console.log(err);
+					res.end();
+				}
+				else {
+					// display the "successfull created" message
+					res.write('Successfully added ' + newItem.type + ' to the database');
+					res.write("<br><a href=\"/public/addItemForm.html\">Click here to add another item</a>");
+					res.end();
+				}
+				} );
+		};
+	})
+});
 
 // endpoint for showing all the items
 app.use('/all', (req, res) => {
@@ -633,6 +684,10 @@ app.use('/home', (req, res) => {
 	// edit item anonymity
 	res.write('<li>');
 	res.write(" <a href=\"/edit_item_anonymity_request" + "\">Edit Item Anonymity</a>");
+	res.write('</li>');
+	// edit capacity
+	res.write('<li>');
+	res.write(" <a href=\"/edit_capacity_request" + "\">Edit Capacity</a>");
 	res.write('</li>');
 
 	res.write('</ul>');
