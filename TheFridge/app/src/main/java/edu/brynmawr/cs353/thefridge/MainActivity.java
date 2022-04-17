@@ -14,8 +14,8 @@ public class MainActivity extends AppCompatActivity {
 
         //automatically redirects to the add item page - change to showing
         //  home page once created
-//        moveToAddItem();
-        registerUser();
+        moveToAddItem();
+//        registerUser();
     }
 
     public void moveToAddItem() {
