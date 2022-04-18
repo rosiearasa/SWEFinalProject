@@ -2,6 +2,7 @@ package edu.brynmawr.cs353.thefridge;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -14,17 +15,23 @@ public class MainActivity extends AppCompatActivity {
 
         //automatically redirects to the add item page - change to showing
         //  home page once created
-        moveToAddItem();
+        //addItemButtonClick();
 //        registerUser();
     }
 
-    public void moveToAddItem() {
+    public void addItemButtonClick(View v) {
         Intent intent = new Intent(this, AddItemActivity.class);
         startActivity(intent);
     }
 
-    public void registerUser(){
-        Intent intent = new Intent (this,RegisterUserFragment.class );
+    public void registerUserButtonClick(View v) {
+        Intent intent = new Intent (this, RegisterUserFragment.class);
         startActivity(intent);
     }
+
+    public void deleteItemButtonClick(View v) {
+        Intent intent = new Intent(this, AddItemActivity.class);
+        startActivity(intent);
+    }
+
 }
