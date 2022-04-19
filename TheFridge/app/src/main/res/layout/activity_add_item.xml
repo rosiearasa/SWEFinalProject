@@ -19,7 +19,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Item type: "
+                android:text="Item type:"
                 android:textSize="25dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintLeft_toLeftOf="parent"
@@ -30,7 +30,8 @@
                 android:id="@+id/type"
                 android:layout_height="wrap_content"
                 android:layout_width="match_parent"
-                android:inputType="text" />
+                android:inputType="text"
+                android:hint="e.g. Strawberries"/>
 
         </LinearLayout>
 
@@ -42,7 +43,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Expiration Date: "
+                android:text="Expiration Date:"
                 android:textSize="25dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintLeft_toLeftOf="parent"
@@ -75,17 +76,17 @@
             <CheckBox
                 android:id="@+id/today"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:textSize="18dp"
                 android:text="Today"
                 android:onClick="onTodayCheckboxClicked"/>
 
             <EditText
                 android:id="@+id/dateAdded"
-                android:layout_height="wrap_content"
                 android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:textSize="20dp"
-                android:text="Other: "
+                android:hint="Other date added"
                 android:inputType="date" />
 
         </LinearLayout>
@@ -100,7 +101,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Note: "
+                android:text="Note:"
                 android:textSize="25dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintLeft_toLeftOf="parent"
@@ -117,10 +118,10 @@
 
             <EditText
                 android:id="@+id/note"
-                android:layout_height="wrap_content"
                 android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:inputType="text"
-                android:onClick="onAddItem"/>
+                android:hint="e.g. Free (if public view)"/>
 
         </LinearLayout>
 
@@ -130,7 +131,8 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:text="Add item"
-            android:textSize="25dp" />
+            android:textSize="25dp"
+            android:onClick="onAddItem"/>
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

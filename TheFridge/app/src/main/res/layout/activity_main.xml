@@ -46,6 +46,12 @@
             android:text="Delete Item" 
 	    android:onClick = "deleteItemButtonClick"/>
 
+		<Button
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="See All Items in the Fridge"
+			android:onClick="seeItemsButtonClick"/>
+
 
         <TextView
             android:layout_width="match_parent"

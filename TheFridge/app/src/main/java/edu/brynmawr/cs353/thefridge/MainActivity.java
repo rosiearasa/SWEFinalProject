@@ -12,11 +12,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        //automatically redirects to the add item page - change to showing
-        //  home page once created
-        //addItemButtonClick();
-//        registerUser();
     }
 
     public void addItemButtonClick(View v) {
@@ -31,6 +26,11 @@ public class MainActivity extends AppCompatActivity {
 
     public void deleteItemButtonClick(View v) {
         Intent intent = new Intent(this, AddItemActivity.class);
+        startActivity(intent);
+    }
+
+    public void seeItemsButtonClick(View v) {
+        Intent intent = new Intent(this, SeeItemsActivity.class);
         startActivity(intent);
     }
 

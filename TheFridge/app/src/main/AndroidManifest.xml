@@ -23,6 +23,8 @@
         <activity android:name=".AddItemActivity" />
         <activity android:name=".AddItemSubmission" />
         <activity android:name=".RegisterUserFragment"/>
+        <activity android:name=".SeeItemsActivity"/>
+        <activity android:name=".MyItems"/>
 
     </application>
 
