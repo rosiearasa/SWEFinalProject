@@ -19,38 +19,15 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:textSize="30dp"
-            android:text="Welcome to the Fridge!" />
+            android:text="Welcome to the Fridge! Please sign in!" />
 
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center"/>
-
-	<Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Register User" 
-	    android:onClick = "registerUserButtonClick"/>
-
- 	<Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Add Item" 
-	    android:onClick = "addItemButtonClick"/>
-
-	<Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Delete Item" 
-	    android:onClick = "deleteItemButtonClick"/>
 
 		<Button
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:text="See All Items in the Fridge"
-			android:onClick="seeItemsButtonClick"/>
+			android:text="Register New User"
+			android:onClick = "registerUserButtonClick"/>
 
 
         <TextView

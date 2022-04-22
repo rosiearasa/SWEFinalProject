@@ -8,29 +8,17 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
 
+    String user = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
     }
 
-    public void addItemButtonClick(View v) {
-        Intent intent = new Intent(this, AddItemActivity.class);
-        startActivity(intent);
-    }
-
     public void registerUserButtonClick(View v) {
         Intent intent = new Intent (this, RegisterUserFragment.class);
-        startActivity(intent);
-    }
-
-    public void deleteItemButtonClick(View v) {
-        Intent intent = new Intent(this, AddItemActivity.class);
-        startActivity(intent);
-    }
-
-    public void seeItemsButtonClick(View v) {
-        Intent intent = new Intent(this, SeeItemsActivity.class);
+        //intent.putExtra("user", user);
         startActivity(intent);
     }
 
