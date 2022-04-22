@@ -311,7 +311,8 @@ app.use('/edit_item_expDate', (req, res) => {
 			});
 		} else {
 			// no new info given
-			res.send('no update to expDate');
+			res.write('no update to expDate');
+			res.write('<br> <a href=\"/home\">Go back to Home</a>');
 		}
 	} else {
 		// no id given, cannot find item
@@ -487,7 +488,8 @@ app.use('/add_item', (req, res) => {
 				else {
 					// display the "successfull created" message
 					res.write('Successfully added ' + newItem.type + ' to the database');
-					res.write("<br><a href=\"/public/addItemForm.html\">Click here to add another item</a>");
+					res.write('<br> <a href=\"/home\">Go back to Home</a>');
+					res.write("   <a href=\"/public/addItemForm.html\">Click here to add another item</a>");
 					res.end();
 				}
 				} );
@@ -596,6 +598,7 @@ app.use('/show_expired', (req, res) => {
 					}
 				});
 				res.write('</ul>');
+				res.write(' <a href=\"/home\">Go back to Home</a>');
 
 				res.end();
 			}
@@ -645,12 +648,17 @@ app.use('/api', (req, res) => {
 		}
 		else if (items.length == 0) {
 		    // no objects found, so send back empty json
-		    res.json({});
+
+			res.write('  <a href=\"/home\">Go back to Home</a> <br> <br>');
+			res.end(JSON.stringify({}));
+
 		}
 		else if (items.length == 1 ) {
 		    var item = items[0];
-		    // send back a single JSON object
-			res.json( { 'type' : item.type, 'expDate' : (item.expDate).toDateString(), 'date Added' : (item.dateAdded).toDateString(), 'owner' : item.userName, 'anonymous' : item.anonymous, 'note' : item.note[0], 'publicNote' : item.note[1] } );
+			// send back a single JSON object
+			var returnString = { 'type' : item.type, 'expDate' : (item.expDate).toDateString(), 'date Added' : (item.dateAdded).toDateString(), 'owner' : item.userName, 'anonymous' : item.anonymous, 'note' : item.note[0], 'publicNote' : item.note[1] }
+			res.write('  <a href=\"/home\">Go back to Home</a> <br> <br>');
+			res.end(JSON.stringify(returnString));
 		}
 		else {
 		    // construct an array out of the result
@@ -659,10 +667,12 @@ app.use('/api', (req, res) => {
 				returnArray.push( { 'type' : item.type, 'expDate' : (item.expDate).toDateString(), 'date Added' : (item.dateAdded).toDateString(), 'owner' : item.userName, 'anonymous' : item.anonymous, 'note' : item.note[0], 'publicNote' : item.note[1] } );
 			});
 		    // send it back as JSON Array
-		    res.json(returnArray);
+			res.write('  <a href=\"/home\">Go back to Home</a> <br> <br>');
+			res.end(JSON.stringify(returnArray));
 		}
 
 	}).sort({'expDate': 'asc'});
+	
 });
 
 // list all users, formatted like /api (JL)
@@ -672,7 +682,10 @@ app.use('/all_users', (req, res) => {
 			console.log('error: ' + err);
 		} else {
 			console.log(users);
-			res.json(users);
+			
+			res.write('  <a href=\"/home\">Go back to Home</a> <br> <br>');
+			res.end(JSON.stringify(users));
+			//res.json(users);
 		}
 	});
 });
