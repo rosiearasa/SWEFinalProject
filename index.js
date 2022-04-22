@@ -54,14 +54,17 @@ app.use('/adduser', (req,res)=>{
 		if (err) {
 		    res.type('html').status(200);
 		    res.write('uh oh: ' + err);
+			res.write('<br> <a href=\"/home\">Go back to Home</a>');
+			res.write("   <a href=\"/public/addUserForm.html\">Click here to add an User</a>");
 		    console.log(err);
 		    res.end();
 		}
 		if(!err) {
-			//res.json({'status': 'success'});
 		    // display the "successfull created" message
-		    //res.write('successfully added ' + newUser.name + ' to the database');
-			res.redirect('/allusers');
+			res.write(' <a href=\"/home\">Go back to Home</a>');
+			res.write("   <a href=\"/public/addUserForm.html\">Click here to add an User</a>");
+		    res.write('<br><br> Successfully added ' + newUser.name + ' to the database');
+			//res.redirect('/allusers');
 			res.end();
 
 		}
@@ -482,6 +485,8 @@ app.use('/add_item', (req, res) => {
 			newItem.save( (err) => {
 				if (err) {
 					res.write('uh oh: ' + err);
+					res.write('<br> <a href=\"/home\">Go back to Home</a>');
+					res.write("   <a href=\"/public/addItemForm.html\">Click here to add an item</a>");
 					console.log(err);
 					res.end();
 				}
