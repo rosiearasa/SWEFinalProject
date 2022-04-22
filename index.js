@@ -54,13 +54,18 @@ app.use('/adduser', (req,res)=>{
 		if (err) {
 		    res.type('html').status(200);
 		    res.write('uh oh: ' + err);
+			res.write('<br> <a href=\"/home\">Go back to Home</a>');
+			res.write("   <a href=\"/public/addUserForm.html\">Click here to add an User</a>");
 		    console.log(err);
 		    res.end();
 		}
 		if(!err) {
-			res.json({'status': 'success'});
 		    // display the "successfull created" message
-		    res.send('successfully added ' + newUser.name + ' to the database');
+			res.write(' <a href=\"/home\">Go back to Home</a>');
+			res.write("   <a href=\"/public/addUserForm.html\">Click here to add an User</a>");
+		    res.write('<br><br> Successfully added ' + newUser.name + ' to the database');
+			//res.redirect('/allusers');
+			res.end();
 
 		}
 });
@@ -95,11 +100,12 @@ app.use('/allusers', (req, res) => {
 			    res.write('<li>');
 			    res.write('Name: ' + user.name + '; RoomNumber: ' + user.roomNumber);
 			    // this creates a link to the /delete endpoint
-			    res.write(" <a href=\"/deleteuser?name=" + user.name + "\">[Delete]</a>");
+				res.write(" <a href = \"/deleteuser?name=" + user.name + "\" onclick = \"return confirm('Delete this user from the fridge?');\">[Delete]</a>");
 			    res.write('</li>');
 
 			});
 			res.write('</ul>');
+			res.write(' <a href=\"/home\">Go back to Home</a>');
 			res.end();
 		    }
 
@@ -308,7 +314,8 @@ app.use('/edit_item_expDate', (req, res) => {
 			});
 		} else {
 			// no new info given
-			res.send('no update to expDate');
+			res.write('no update to expDate');
+			res.write('<br> <a href=\"/home\">Go back to Home</a>');
 		}
 	} else {
 		// no id given, cannot find item
@@ -478,13 +485,16 @@ app.use('/add_item', (req, res) => {
 			newItem.save( (err) => {
 				if (err) {
 					res.write('uh oh: ' + err);
+					res.write('<br> <a href=\"/home\">Go back to Home</a>');
+					res.write("   <a href=\"/public/addItemForm.html\">Click here to add an item</a>");
 					console.log(err);
 					res.end();
 				}
 				else {
 					// display the "successfull created" message
 					res.write('Successfully added ' + newItem.type + ' to the database');
-					res.write("<br><a href=\"/public/addItemForm.html\">Click here to add another item</a>");
+					res.write('<br> <a href=\"/home\">Go back to Home</a>');
+					res.write("   <a href=\"/public/addItemForm.html\">Click here to add another item</a>");
 					res.end();
 				}
 				} );
@@ -546,9 +556,10 @@ app.use('/all', (req, res) => {
 						res.write(item.type + '  -  expires on ' + (item.expDate).toDateString() + ' and added on ' + (item.dateAdded).toDateString() + '; Owner: ' + owner + ', anonymous - ' + anonymous);
 
 						// this creates a link to the /delete endpoint
-						res.write(" <a href=\"/delete?id=" + item._id + "\">[Delete]</a>");
+						res.write(" <a href=\"/delete?id=" + item._id + "\" onclick = \"return confirm('Delete this item from the fridge?');\""+">[Delete]</a>");
 						res.write('</li>');
 				});
+				res.write("<br><br><a href=\"/home\">Go back to Home</a>");
 
 				res.end();
 			}
@@ -592,6 +603,7 @@ app.use('/show_expired', (req, res) => {
 					}
 				});
 				res.write('</ul>');
+				res.write(' <a href=\"/home\">Go back to Home</a>');
 
 				res.end();
 			}
@@ -641,12 +653,17 @@ app.use('/api', (req, res) => {
 		}
 		else if (items.length == 0) {
 		    // no objects found, so send back empty json
-		    res.json({});
+
+			res.write('  <a href=\"/home\">Go back to Home</a> <br> <br>');
+			res.end(JSON.stringify({}));
+
 		}
 		else if (items.length == 1 ) {
 		    var item = items[0];
-		    // send back a single JSON object
-			res.json( { 'type' : item.type, 'expDate' : (item.expDate).toDateString(), 'date Added' : (item.dateAdded).toDateString(), 'owner' : item.userName, 'anonymous' : item.anonymous, 'note' : item.note[0], 'publicNote' : item.note[1] } );
+			// send back a single JSON object
+			var returnString = { 'type' : item.type, 'expDate' : (item.expDate).toDateString(), 'date Added' : (item.dateAdded).toDateString(), 'owner' : item.userName, 'anonymous' : item.anonymous, 'note' : item.note[0], 'publicNote' : item.note[1] }
+			res.write('  <a href=\"/home\">Go back to Home</a> <br> <br>');
+			res.end(JSON.stringify(returnString));
 		}
 		else {
 		    // construct an array out of the result
@@ -655,10 +672,12 @@ app.use('/api', (req, res) => {
 				returnArray.push( { 'type' : item.type, 'expDate' : (item.expDate).toDateString(), 'date Added' : (item.dateAdded).toDateString(), 'owner' : item.userName, 'anonymous' : item.anonymous, 'note' : item.note[0], 'publicNote' : item.note[1] } );
 			});
 		    // send it back as JSON Array
-		    res.json(returnArray);
+			res.write('  <a href=\"/home\">Go back to Home</a> <br> <br>');
+			res.end(JSON.stringify(returnArray));
 		}
 
 	}).sort({'expDate': 'asc'});
+	
 });
 
 // list all users, formatted like /api (JL)
@@ -668,7 +687,10 @@ app.use('/all_users', (req, res) => {
 			console.log('error: ' + err);
 		} else {
 			console.log(users);
-			res.json(users);
+			
+			res.write('  <a href=\"/home\">Go back to Home</a> <br> <br>');
+			res.end(JSON.stringify(users));
+			//res.json(users);
 		}
 	});
 });
