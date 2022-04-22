@@ -19,6 +19,7 @@ public class AddItemActivity extends AppCompatActivity {
 
     boolean today = false;
     boolean publicNote = false;
+    boolean anonymous = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +48,7 @@ public class AddItemActivity extends AppCompatActivity {
         EditText noteView = (EditText) findViewById(R.id.note);
         String note = noteView.getText().toString();
         Log.v("note",note);
+        Log.v("public", publicNote ? "true" : "false");
 
         addItemToDataBase(type, expDate, dateAdded, note, null);
 
@@ -61,8 +63,9 @@ public class AddItemActivity extends AppCompatActivity {
                     try {
                         //create the url for /add_item
                         String end = "?type="+type+"&expDate="+expDate+"&dateAdded="+dateAdded;
-                        end += String.format("&user=%s&inFridge=%d&anonymous=%b&note=%s&public=%s", null, 0, false, note, publicNote);
+                        end += String.format("&user=%s&inFridge=%d&anonymous=%b&note=%s&public=%s", null, 0, anonymous, note, publicNote);
                         //Log.v("url", end);
+                        Log.v("anonymous", anonymous==false ? "false" : "true");
 
                         URL url = new URL("http://10.0.2.2:3000/add_item"+end);
 
@@ -107,6 +110,12 @@ public class AddItemActivity extends AppCompatActivity {
     }
 
     public void onPublicCheckboxClicked(View v) {
+        Log.v("checked", "public checkmark clicked");
         publicNote = true;
+    }
+
+    public void onAnonymousCheckboxClicked(View v) {
+        Log.v("checked", "anonymous checkmark clicked");
+        anonymous = true;
     }
 }

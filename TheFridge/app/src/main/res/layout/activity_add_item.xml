@@ -54,7 +54,8 @@
                 android:id="@+id/expDate"
                 android:layout_height="wrap_content"
                 android:layout_width="match_parent"
-                android:inputType="date" />
+                android:inputType="date"
+                android:hint="e.g. 1/1/2000"/>
 
         </LinearLayout>
 
@@ -125,6 +126,14 @@
 
         </LinearLayout>
 
+
+        <CheckBox
+            android:id="@+id/anonymous"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:textSize="18dp"
+            android:text="Make item anonymous (other users can't who added it)"
+            android:onClick="onAnonymousCheckboxClicked"/>
 
         <Button
             android:layout_width="match_parent"
