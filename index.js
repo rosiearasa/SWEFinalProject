@@ -546,7 +546,7 @@ app.use('/all', (req, res) => {
 						res.write(item.type + '  -  expires on ' + (item.expDate).toDateString() + ' and added on ' + (item.dateAdded).toDateString() + '; Owner: ' + owner + ', anonymous - ' + anonymous);
 
 						// this creates a link to the /delete endpoint
-						res.write(" <a href=\"/delete?id=" + item._id + "\">[Delete]</a>");
+						res.write(" <a href=\"/delete?id=" + item._id + "\" onclick = \"return confirm('Delete this item from the fridge?');\""+">[Delete]</a>");
 						res.write('</li>');
 				});
 
