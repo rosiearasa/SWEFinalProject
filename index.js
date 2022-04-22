@@ -58,9 +58,11 @@ app.use('/adduser', (req,res)=>{
 		    res.end();
 		}
 		if(!err) {
-			res.json({'status': 'success'});
+			//res.json({'status': 'success'});
 		    // display the "successfull created" message
-		    res.send('successfully added ' + newUser.name + ' to the database');
+		    //res.write('successfully added ' + newUser.name + ' to the database');
+			res.redirect('/allusers');
+			res.end();
 
 		}
 });
@@ -95,11 +97,12 @@ app.use('/allusers', (req, res) => {
 			    res.write('<li>');
 			    res.write('Name: ' + user.name + '; RoomNumber: ' + user.roomNumber);
 			    // this creates a link to the /delete endpoint
-			    res.write(" <a href=\"/deleteuser?name=" + user.name + "\">[Delete]</a>");
+				res.write(" <a href = \"/deleteuser?name=" + user.name + "\" onclick = \"return confirm('Delete this user from the fridge?');\">[Delete]</a>");
 			    res.write('</li>');
 
 			});
 			res.write('</ul>');
+			res.write(' <a href=\"/home\">Go back to Home</a>');
 			res.end();
 		    }
 
@@ -549,6 +552,7 @@ app.use('/all', (req, res) => {
 						res.write(" <a href=\"/delete?id=" + item._id + "\" onclick = \"return confirm('Delete this item from the fridge?');\""+">[Delete]</a>");
 						res.write('</li>');
 				});
+				res.write("<br><br><a href=\"/home\">Go back to Home</a>");
 
 				res.end();
 			}
