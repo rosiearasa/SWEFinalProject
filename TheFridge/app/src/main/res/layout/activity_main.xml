@@ -14,28 +14,86 @@
         android:gravity="center">
 
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:textSize="30dp"
-            android:text="Welcome to the Fridge! Please sign in!" />
+		<TextView
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:gravity="center"
+			android:textSize="30dp"
+			android:text="Welcome to the Fridge!" />
 
+		<TextView
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:gravity="center"
+			android:textSize="26dp"
+			android:text="Please sign in" />
+
+
+		<LinearLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:orientation="horizontal">
+
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:gravity="center"
+				android:textSize="20dp"
+				android:text="Name: " />
+
+			<EditText
+				android:id="@+id/name"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"/>
+
+		</LinearLayout>
+
+		<LinearLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:orientation="horizontal">
+
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:gravity="center"
+				android:textSize="20dp"
+				android:text="Room Number: "/>
+
+			<EditText
+				android:id="@+id/roomNumber"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:onClick="onSignIn"/>
+
+		</LinearLayout>
 
 
 		<Button
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:text="Register New User"
-			android:onClick = "registerUserButtonClick"/>
+			android:text="Sign-in"
+			android:onClick="onSignIn"/>
 
+		<LinearLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:orientation="horizontal"
+			android:gravity="center">
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:textSize="12dp"
-            android:text="Name" />
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="First time here? "
+				android:textSize="20dp"/>
+
+			<Button
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="Register New User"
+				android:onClick = "registerUserButtonClick"/>
+
+		</LinearLayout>
 
     </LinearLayout>
 

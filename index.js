@@ -448,14 +448,14 @@ app.use('/read_add_item_form', (req, res) => {
 	note = req.body.note
 	public = (req.body.public=='yes');
 
-	let url = `/add_item?type=${type}&expDate=${expDate}&dateAdded=${dateAdded}&user=${user}&inFridge=${inFridge}&anonymous=${anonymous}&note=${note}&public=${public}`
+	let url = `/add_item?type=${type}&expDate=${expDate}&dateAdded=${dateAdded}&user=${user}&inFridge=${inFridge}&anonymous=${anonymous}&note=${note}&public=${public}&userName=${null}`
 	res.redirect(url)
 });
 
 //adds the item to the database (MJ)
 app.use('/add_item', (req, res) => {
 	// construct the Item from the form data which is in the request body
-	console.log("got here");
+	//console.log("got here");
 	res.type('html').status(200);
 	Item.countDocuments( (err, count) => {
 		if (err) {
@@ -472,10 +472,9 @@ app.use('/add_item', (req, res) => {
 				//the date the item was added - current date if 'today' was checked, otherwise the specified date
 				dateAdded:((req.query.today=='yes') ? Date.now() : req.query.dateAdded),
 				user: null,							//the user associated with it - null if added from the web
-				userName: null,
+				userName: req.query.userName,
 				inFridge: 0,						//the fridge the item is in - all in fridge 0 right now
 				anonymous: req.query.anonymous,      // default not anonymous
-				id: Date.now(),
 				//any note associated with the item, true if it's public and false if private
 				note: [req.query.note, req.query.public]
 				});
@@ -654,26 +653,29 @@ app.use('/api', (req, res) => {
 		else if (items.length == 0) {
 		    // no objects found, so send back empty json
 
-			res.write('  <a href=\"/home\">Go back to Home</a> <br> <br>');
-			res.end(JSON.stringify({}));
+			/*res.write('  <a href=\"/home\">Go back to Home</a> <br> <br>');
+			res.end(JSON.stringify({}));*/
+			res.json({});
 
 		}
 		else if (items.length == 1 ) {
 		    var item = items[0];
 			// send back a single JSON object
-			var returnString = { 'type' : item.type, 'expDate' : (item.expDate).toDateString(), 'date Added' : (item.dateAdded).toDateString(), 'owner' : item.userName, 'anonymous' : item.anonymous, 'note' : item.note[0], 'publicNote' : item.note[1] }
+			/*var returnString = { 'type' : item.type, 'expDate' : (item.expDate).toDateString(), 'date Added' : (item.dateAdded).toDateString(), 'owner' : item.userName, 'anonymous' : item.anonymous, 'note' : item.note[0], 'publicNote' : item.note[1] }
 			res.write('  <a href=\"/home\">Go back to Home</a> <br> <br>');
-			res.end(JSON.stringify(returnString));
+			res.end(JSON.stringify(returnString));*/
+			res.json( { 'type' : item.type, 'expDate' : (item.expDate).toDateString(), 'date Added' : (item.dateAdded).toDateString(), 'owner' : item.userName, 'anonymous' : item.anonymous, 'note' : item.note[0], 'publicNote' : item.note[1] } );
 		}
 		else {
 		    // construct an array out of the result
 		    var returnArray = [];
-		    await items.forEach( async (item) => {
+		    items.forEach( async (item) => {
 				returnArray.push( { 'type' : item.type, 'expDate' : (item.expDate).toDateString(), 'date Added' : (item.dateAdded).toDateString(), 'owner' : item.userName, 'anonymous' : item.anonymous, 'note' : item.note[0], 'publicNote' : item.note[1] } );
 			});
 		    // send it back as JSON Array
-			res.write('  <a href=\"/home\">Go back to Home</a> <br> <br>');
-			res.end(JSON.stringify(returnArray));
+			/*res.write('  <a href=\"/home\">Go back to Home</a> <br> <br>');
+			res.end(JSON.stringify(returnArray));*/
+			res.json(returnArray);
 		}
 
 	}).sort({'expDate': 'asc'});

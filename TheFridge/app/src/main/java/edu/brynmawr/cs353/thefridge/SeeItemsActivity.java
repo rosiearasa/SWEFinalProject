@@ -20,10 +20,13 @@ import java.util.concurrent.TimeUnit;
 public class SeeItemsActivity extends AppCompatActivity {
     String[] mobileArray = {"Android","IPhone","WindowsMobile","Blackberry", "WebOS","Ubuntu","Windows7","Max OS X"};
     JSONArray items;
+    String user = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        //Log.v("checkin", "in seeitems");
         super.onCreate(savedInstanceState);
+        user = getIntent().getStringExtra("user");
         setContentView(R.layout.activity_see_items);
 
         //ArrayAdapter adapter = new ArrayAdapter<String>(this,
@@ -31,18 +34,23 @@ public class SeeItemsActivity extends AppCompatActivity {
         getItemsFromDatabase();
         ItemAdapter adapter = new ItemAdapter(this, items);
 
+        //Log.v("hmm", adapter.toString());
+
         ListView listView = (ListView) findViewById(R.id.item_list);
         listView.setAdapter(adapter);
+        //Log.v("checkin", "finished onCreate for seeitems");
     }
 
     public void goToMyItems(View v) {
         Intent intent = new Intent(this, MyItems.class);
+        intent.putExtra("user", user);
         startActivity(intent);
     }
 
     public void getItemsFromDatabase() {
         //JSONArray items;
         try {
+            Log.v("checking", "Getting items from database");
             ExecutorService executor = Executors.newSingleThreadExecutor();
             executor.execute( () -> {
                         try {

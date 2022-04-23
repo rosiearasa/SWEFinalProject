@@ -1,6 +1,7 @@
 package edu.brynmawr.cs353.thefridge;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,6 +25,9 @@ public class ItemAdapter extends BaseAdapter {
 
     @Override
     public int getCount(){
+        if(items == null) {
+            return 0;
+        }
         return items.length();
     }
 
@@ -39,10 +43,11 @@ public class ItemAdapter extends BaseAdapter {
 
     @Override
     public View getView(int i, View view, ViewGroup viewGroup) {
-
+        Log.v("checkin", "making item view");
         view = inflater.inflate(R.layout.activity_list_view, null);
         try {
             JSONObject current = items.getJSONObject(i);
+            Log.v("current item", current.toString());
 
             String type = current.getString("type");
             TextView typeView = view.findViewById(R.id.item_type);

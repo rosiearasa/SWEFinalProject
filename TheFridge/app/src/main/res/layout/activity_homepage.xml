@@ -12,11 +12,12 @@
         android:gravity="center">
 
         <TextView
+            android:id="@+id/welcome"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
             android:textSize="30dp"
-            android:text="Welcome to the Fridge!" />
+            android:text="Welcome!" />
 
 
         <LinearLayout

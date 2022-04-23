@@ -17,7 +17,6 @@ var ItemSchema = new Schema({
     userName: String,
     inFridge: {type: Number, required: true},
     anonymous: Boolean,
-    id: Number,
     note: [] //[note, public? (true for public, false for private)]
     });
 

@@ -11,9 +11,12 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class RegisterUserFragment extends AppCompatActivity {
 
+    String user = null;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        user = getIntent().getStringExtra("user");
         setContentView(R.layout.fragment_registeruser);
         }
     }

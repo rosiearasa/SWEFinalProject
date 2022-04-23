@@ -21,9 +21,12 @@ public class AddItemActivity extends AppCompatActivity {
     boolean publicNote = false;
     boolean anonymous = false;
 
+    String user = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        user = getIntent().getStringExtra("user");
         setContentView(R.layout.activity_add_item);
     }
 
@@ -63,7 +66,7 @@ public class AddItemActivity extends AppCompatActivity {
                     try {
                         //create the url for /add_item
                         String end = "?type="+type+"&expDate="+expDate+"&dateAdded="+dateAdded;
-                        end += String.format("&user=%s&inFridge=%d&anonymous=%b&note=%s&public=%s", null, 0, anonymous, note, publicNote);
+                        end += String.format("&userName=%s&user=%s&inFridge=%d&anonymous=%b&note=%s&public=%s", user, null, 0, anonymous, note, publicNote);
                         //Log.v("url", end);
                         Log.v("anonymous", anonymous==false ? "false" : "true");
 
@@ -102,6 +105,7 @@ public class AddItemActivity extends AppCompatActivity {
 
     public void goToSubmissionPage() {
         Intent intent = new Intent(this, AddItemSubmission.class);
+        intent.putExtra("user", user);
         startActivity(intent);
     }
 
