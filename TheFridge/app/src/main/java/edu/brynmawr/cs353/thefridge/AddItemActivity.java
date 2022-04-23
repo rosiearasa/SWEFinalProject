@@ -10,6 +10,9 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -121,5 +124,31 @@ public class AddItemActivity extends AppCompatActivity {
     public void onAnonymousCheckboxClicked(View v) {
         Log.v("checked", "anonymous checkmark clicked");
         anonymous = true;
+    }
+
+    public void onItemTypeCheckboxClicked(View v) {
+        int expIn = 0;
+        switch (v.getId()) {
+            case R.id.fruit:
+                expIn = 7;
+                break;
+            case R.id.meat:
+                expIn = 3;
+                break;
+            case R.id.milk:
+                expIn = 10;
+                break;
+            case R.id.other:
+                expIn = 0;
+                break;
+        }
+
+        //update text
+        EditText expDateView = (EditText) findViewById(R.id.expDate);
+        Instant sugExpDate = Instant.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy").withZone(ZoneId.systemDefault());
+        long msExpIn = expIn*TimeUnit.MILLISECONDS.convert(1, TimeUnit.DAYS);
+        sugExpDate = sugExpDate.plusMillis(msExpIn);
+        expDateView.setHint("suggested: " + formatter.format(sugExpDate));
     }
 }
