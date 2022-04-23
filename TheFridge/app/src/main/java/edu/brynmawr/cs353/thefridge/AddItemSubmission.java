@@ -1,5 +1,11 @@
 package edu.brynmawr.cs353.thefridge;
 
+/*
+    Author: Maya Johnson
+    Date: 4/23/22
+    Successful submission page for an item. Redirects back to add item form or back to home
+ */
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;

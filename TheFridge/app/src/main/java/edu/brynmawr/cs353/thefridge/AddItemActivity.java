@@ -1,3 +1,12 @@
+/*
+    Author: Maya Johnson
+    Date: 4/23/22
+    Adds an item to the database from input the user enters
+    Fields: item type, date added (today or other), expiration date with
+        item-type specific suggestions, note (public or private), and
+        anonymity (don't attach user name to item)
+ */
+
 package edu.brynmawr.cs353.thefridge;
 
 import android.content.Intent;
@@ -20,11 +29,13 @@ import java.util.concurrent.TimeUnit;
 
 public class AddItemActivity extends AppCompatActivity {
 
+    //user currently signed in
+    String user = null;
+
+    //values from checkboxes
     boolean today = false;
     boolean publicNote = false;
     boolean anonymous = false;
-
-    String user = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,15 +44,19 @@ public class AddItemActivity extends AppCompatActivity {
         setContentView(R.layout.activity_add_item);
     }
 
+    //read input from edit-texts and pass them to NodeExpress
     public void onAddItem(View v) {
+        //item type
         EditText typeView = (EditText) findViewById(R.id.type);
         String type = typeView.getText().toString();
-        Log.v("type",type);
+        //Log.v("type",type);
 
+        //expiration date
         EditText expDateView = (EditText) findViewById(R.id.expDate);
         String expDate = expDateView.getText().toString();
-        Log.v("expDate",expDate);
+        //Log.v("expDate",expDate);
 
+        //date item was added
         String dateAdded = null;
         if(today) {
             dateAdded = (new Date()).toString();
@@ -49,15 +64,18 @@ public class AddItemActivity extends AppCompatActivity {
             EditText dateAddedView = (EditText) findViewById(R.id.dateAdded);
             dateAdded = dateAddedView.getText().toString();
         }
-        Log.v("dateAdded", dateAdded);
+        //Log.v("dateAdded", dateAdded);
 
+        //note on the item
         EditText noteView = (EditText) findViewById(R.id.note);
         String note = noteView.getText().toString();
-        Log.v("note",note);
-        Log.v("public", publicNote ? "true" : "false");
+        //Log.v("note",note);
+        //Log.v("public", publicNote ? "true" : "false");
 
+        //call function that adds to the data base
         addItemToDataBase(type, expDate, dateAdded, note, null);
 
+        //go to the submission page
         goToSubmissionPage();
     }
 
@@ -106,26 +124,31 @@ public class AddItemActivity extends AppCompatActivity {
         }
     }
 
+    //Goes to the item submission page
     public void goToSubmissionPage() {
         Intent intent = new Intent(this, AddItemSubmission.class);
         intent.putExtra("user", user);
         startActivity(intent);
     }
 
+    //if "Today" checkbox marked for date added, record it
     public void onTodayCheckboxClicked(View v) {
         today = true;
     }
 
+    //if "Public" checkbox marked for note, record it
     public void onPublicCheckboxClicked(View v) {
-        Log.v("checked", "public checkmark clicked");
+        //Log.v("checked", "public checkmark clicked");
         publicNote = true;
     }
 
+    //if "anonymous" checkbox marked, record it
     public void onAnonymousCheckboxClicked(View v) {
         Log.v("checked", "anonymous checkmark clicked");
         anonymous = true;
     }
 
+    //Fill in expiration date suggestions based on item type
     public void onItemTypeCheckboxClicked(View v) {
         int expIn = 0;
         switch (v.getId()) {
@@ -139,16 +162,18 @@ public class AddItemActivity extends AppCompatActivity {
                 expIn = 10;
                 break;
             case R.id.other:
-                expIn = 0;
+                expIn = 5;
                 break;
         }
 
-        //update text
-        EditText expDateView = (EditText) findViewById(R.id.expDate);
+        //Calculates the suggested date from the current date + number of days item expires in * ms in a day
         Instant sugExpDate = Instant.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy").withZone(ZoneId.systemDefault());
         long msExpIn = expIn*TimeUnit.MILLISECONDS.convert(1, TimeUnit.DAYS);
         sugExpDate = sugExpDate.plusMillis(msExpIn);
+
+        //update the hint text for expiration date
+        EditText expDateView = (EditText) findViewById(R.id.expDate);
         expDateView.setHint("suggested: " + formatter.format(sugExpDate));
     }
 }

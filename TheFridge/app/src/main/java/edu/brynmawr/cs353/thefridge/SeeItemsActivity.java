@@ -1,9 +1,15 @@
+/*
+    Author: Maya Johnson
+    Date: 4/23/22
+    Displays all items in the database with the following fields:
+        Item type, associated user (if not anonymous), expiration date,
+        and associated note (if public)
+ */
+
 package edu.brynmawr.cs353.thefridge;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.ListView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -18,62 +24,53 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class SeeItemsActivity extends AppCompatActivity {
-    String[] mobileArray = {"Android","IPhone","WindowsMobile","Blackberry", "WebOS","Ubuntu","Windows7","Max OS X"};
-    JSONArray items;
-    String user = null;
+    JSONArray items;    //items in the fridge
+    String user = null; //current user
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        //Log.v("checkin", "in seeitems");
         super.onCreate(savedInstanceState);
         user = getIntent().getStringExtra("user");
         setContentView(R.layout.activity_see_items);
 
-        //ArrayAdapter adapter = new ArrayAdapter<String>(this,
-        //        R.layout.activity_list_view, mobileArray);
+        //reads items in fridge from NodeExpress
         getItemsFromDatabase();
+
+        //formats and displays the items
         ItemAdapter adapter = new ItemAdapter(this, items);
-
-        //Log.v("hmm", adapter.toString());
-
         ListView listView = (ListView) findViewById(R.id.item_list);
         listView.setAdapter(adapter);
-        //Log.v("checkin", "finished onCreate for seeitems");
     }
 
-    public void goToMyItems(View v) {
-        Intent intent = new Intent(this, MyItems.class);
-        intent.putExtra("user", user);
-        startActivity(intent);
-    }
 
+    //connects to NodeExpress /api to get the items in the fridge
     public void getItemsFromDatabase() {
-        //JSONArray items;
+
         try {
             Log.v("checking", "Getting items from database");
             ExecutorService executor = Executors.newSingleThreadExecutor();
             executor.execute( () -> {
-                        try {
-                            //create the url for /add_item
-                            URL url = new URL("http://10.0.2.2:3000/api");
+                try {
+                    //want the /api endpoint
+                    URL url = new URL("http://10.0.2.2:3000/api");
 
-                            //open the connection and send the url through
-                            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                            conn.setRequestMethod("GET");
-                            conn.connect();
+                    //open the connection and send the url through
+                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                    conn.setRequestMethod("GET");
+                    conn.connect();
 
-                            Scanner in = new Scanner(url.openStream());
-                            String response = in.nextLine();
+                    //read in returned JSON Array of items in the fridge
+                    Scanner in = new Scanner(url.openStream());
+                    String response = in.nextLine();
+                    items = new JSONArray(response);
 
-                            items = new JSONArray(response);
+                    Log.v("items", items.toString());
 
-                            Log.v("message", items.toString());
-
-                        }
-                        catch (Exception e) {
-                            Log.v("error", e.toString());
-                        }
-                    }
+                }
+                catch (Exception e) {
+                    Log.v("error", e.toString());
+                }
+            }
             );
 
             // this waits for up to 2 seconds
@@ -87,7 +84,6 @@ public class SeeItemsActivity extends AppCompatActivity {
         catch (Exception e) {
             // uh oh
             e.printStackTrace();
-            //tv.setText(e.toString());
         }
     }
 
