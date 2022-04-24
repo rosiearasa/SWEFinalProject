@@ -35,11 +35,35 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // import the Item, Person, and Fridge
 var Item = require('./Item.js');
 var User = require('./User.js');
-//var Fridge = require('./Fridge.js');
+var Fridge = require('./Fridge.js');
 const { json } = require('express/lib/response');
 
 // fridge capacity
 var capacity;
+
+// look for primary fridge, or create new one if nonexistent
+var fridgeFilter = {'type' : "PRIMARY"};
+Fridge.findOne(fridgeFilter, (err, fridge) => {
+	if (err) {
+		console.log('error looking for fridge: ' + err);
+	} else if (!fridge) {
+			// no fridge found, create new one
+			var newFridge = new Fridge({
+				function: 'PRIMARY',
+			});
+			newFridge.save((err) => {
+				if (err) {
+					console.log("error saving fridge: " + err);
+				} else {
+					console.log("created new fridge: \n" + newFridge);
+				}
+			});
+	} else {
+		// fridge found, get the saved capacity
+		capacity = fridge.capacity;
+		console.log("found fridge with capacity " + capacity);
+	}
+});
 
 //add user to the database
 app.use('/adduser', (req,res)=>{
@@ -423,14 +447,29 @@ app.use('/edit_capacity', (req, res) => {
 	if (!numItems || isNaN(numItems)) {
 		res.write("Invalid number, no update to capacity.<p>");
 		res.write('<a href=\"/home\">Go back to Home</a>');
+		res.send();
 		console.log("capacity: " + capacity);
 	} else {
-		capacity = numItems;
-		res.write("Successfully changed the fridge capacity to " + capacity + " items.<p>");
-		res.write('<a href=\"/home\">Go back to Home</a>');
-		console.log("capacity: " + capacity);
+		var action = {'$set' : {'capacity' : numItems}};
+		Fridge.findOneAndUpdate(fridgeFilter, action, (err, orig) => {
+			if (err) {
+				res.write("error editing fridge");
+				res.write('<a href=\"/home\">Go back to Home</a>');
+				res.send();
+			} else if (!orig) {
+				res.write("no fridge found?!");
+				res.write('<a href=\"/home\">Go back to Home</a>');
+				res.send();
+			} else {
+				// update current local capacity also
+				capacity = numItems;
+				res.write("Successfully changed the fridge capacity to " + capacity + " items.<p>");
+				res.write('<a href=\"/home\">Go back to Home</a>');
+				console.log("capacity: " + capacity);
+				res.send();
+			}
+		});
 	}
-	res.send();
 });
 
 //reads the info from the form and passes it to /add_item
@@ -679,7 +718,7 @@ app.use('/api', (req, res) => {
 		}
 
 	}).sort({'expDate': 'asc'});
-	
+
 });
 
 // list all users, formatted like /api (JL)
@@ -689,7 +728,7 @@ app.use('/all_users', (req, res) => {
 			console.log('error: ' + err);
 		} else {
 			console.log(users);
-			
+
 			res.write('  <a href=\"/home\">Go back to Home</a> <br> <br>');
 			res.end(JSON.stringify(users));
 			//res.json(users);
