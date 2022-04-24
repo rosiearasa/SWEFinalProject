@@ -664,13 +664,13 @@ app.use('/api', (req, res) => {
 			/*var returnString = { 'type' : item.type, 'expDate' : (item.expDate).toDateString(), 'date Added' : (item.dateAdded).toDateString(), 'owner' : item.userName, 'anonymous' : item.anonymous, 'note' : item.note[0], 'publicNote' : item.note[1] }
 			res.write('  <a href=\"/home\">Go back to Home</a> <br> <br>');
 			res.end(JSON.stringify(returnString));*/
-			res.json( { 'type' : item.type, 'expDate' : (item.expDate).toDateString(), 'date Added' : (item.dateAdded).toDateString(), 'owner' : item.userName, 'anonymous' : item.anonymous, 'note' : item.note[0], 'publicNote' : item.note[1] } );
+			res.json( { 'type' : item.type, 'expDate' : (item.expDate).toDateString(), 'date Added' : (item.dateAdded).toDateString(), 'owner' : item.userName, 'anonymous' : item.anonymous, 'note' : item.note[0], 'publicNote' : item.note[1], "_id" :item._id } );
 		}
 		else {
 		    // construct an array out of the result
 		    var returnArray = [];
 		    items.forEach( async (item) => {
-				returnArray.push( { 'type' : item.type, 'expDate' : (item.expDate).toDateString(), 'date Added' : (item.dateAdded).toDateString(), 'owner' : item.userName, 'anonymous' : item.anonymous, 'note' : item.note[0], 'publicNote' : item.note[1] } );
+				returnArray.push( { 'type' : item.type, 'expDate' : (item.expDate).toDateString(), 'date Added' : (item.dateAdded).toDateString(), 'owner' : item.userName, 'anonymous' : item.anonymous, 'note' : item.note[0], 'publicNote' : item.note[1], "_id" : item._id } );
 			});
 		    // send it back as JSON Array
 			/*res.write('  <a href=\"/home\">Go back to Home</a> <br> <br>');
