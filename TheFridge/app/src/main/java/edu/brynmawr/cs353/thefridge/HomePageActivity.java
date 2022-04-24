@@ -33,7 +33,7 @@ public class HomePageActivity extends AppCompatActivity {
 
     //go to delete item activity
     public void deleteItemButtonClick(View v) {
-        Intent intent = new Intent(this, AddItemActivity.class);
+        Intent intent = new Intent(this, DeleteItemActivity.class);
         intent.putExtra("user", user);
         startActivity(intent);
     }
