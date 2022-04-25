@@ -17,8 +17,11 @@
         <entry key="..\:/Users/mayar/OneDrive/Documents/College/cs353/project/SWEFinalProject/TheFridge/app/src/main/res/layout/fragment_registeruser.xml" value="0.13802083333333334" />
         <entry key="app/src/main/res/layout/activity_add_item.xml" value="0.1" />
         <entry key="app/src/main/res/layout/activity_item_submission.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/activity_list_view.xml" value="0.11481481481481481" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.15070921985815602" />
+        <entry key="app/src/main/res/layout/activity_my_items.xml" value="0.11574074074074074" />
         <entry key="app/src/main/res/layout/activity_register_user.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/activity_see_items.xml" value="0.11574074074074074" />
         <entry key="app/src/main/res/layout/fragment_registeruser.xml" value="0.1" />
       </map>
     </option>

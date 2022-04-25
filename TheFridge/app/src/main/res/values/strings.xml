@@ -6,6 +6,8 @@
     <string name="fullname">Full Name: </string>
     <string name="roomnumber">Room Number: </string>
 
+    <string name="back">Back to HomePage</string>
+
     <string name="hintname">e.g Jane Doe</string>
     <string name="hintroomnumber">e.g 205</string>
     <string name="registersignup">Register Me!</string>

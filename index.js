@@ -43,6 +43,7 @@ var capacity;
 
 //add user to the database
 app.use('/adduser', (req,res)=>{
+	console.log("here!!!")
 	var newUser = new User({
 		name: req.body.name,
 		roomNumber: req.body.roomNumber,
@@ -57,11 +58,12 @@ console.log(newUser)
 		    console.log(err);
 		    res.end();
 		}
-				if(!err) {
+				else{
 					res.json({'status': 'success'})
 		    // display the "successfull created" message
 		    res.send('successfully added ' + newUser.name + ' to the database');
-
+			
+			res.end();
 
 		}
 });

@@ -9,9 +9,9 @@ mongoose.connect('mongodb://127.0.0.1:27017/myDatabase');
 var Schema = mongoose.Schema;
 
 var userSchema = new Schema({
-    name: {type: String, required: true},
+    name: String,
     // id: {type: Number, required: false, unique: true},
-    roomNumber: {type: Number, required: true},
+    roomNumber: Number,
     // myItems: []
     });
 
