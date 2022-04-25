@@ -19,6 +19,7 @@
  *   ~ /delete (AP):
  *   ~ /api:
  *   ~ /all_users (JL): really quick implementation, just to see the users
+ *   ~ /capacity (JL): shows current fridge capacity in api form
  *   ~ /home (JL): links to all other web pages; other web pages may or may not link back
  */
 
@@ -736,6 +737,15 @@ app.use('/all_users', (req, res) => {
 	});
 });
 
+// show capacity in API form, for use in Android (JL)
+app.use('/capacity', (req, res) => {
+	if (!capacity) {
+		res.json({'capacity' : 'undefined'});
+	} else {
+		res.json({'capacity' : capacity});
+	}
+});
+
 // home page with links to other pages
 app.use('/home', (req, res) => {
 	res.type('html');
@@ -792,6 +802,10 @@ app.use('/home', (req, res) => {
 	// expired items
 	res.write('<li>');
 	res.write(" <a href=\"/show_expired" + "\">Expired Items</a>");
+	res.write('</li>');
+	// capacity
+	res.write('<li>');
+	res.write(" <a href=\"/capacity" + "\">Fridge Capacity</a>");
 	res.write('</li>');
 	// all users
 	res.write('<li>');
