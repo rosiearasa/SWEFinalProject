@@ -14,8 +14,12 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -23,6 +27,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -36,6 +41,8 @@ public class AddItemActivity extends AppCompatActivity {
     boolean today = false;
     boolean publicNote = false;
     boolean anonymous = false;
+    int capacity = -1;  // default unlimited
+    int numItems = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,37 +53,115 @@ public class AddItemActivity extends AppCompatActivity {
 
     //read input from edit-texts and pass them to NodeExpress
     public void onAddItem(View v) {
-        //item type
-        EditText typeView = (EditText) findViewById(R.id.type);
-        String type = typeView.getText().toString();
-        //Log.v("type",type);
-
-        //expiration date
-        EditText expDateView = (EditText) findViewById(R.id.expDate);
-        String expDate = expDateView.getText().toString();
-        //Log.v("expDate",expDate);
-
-        //date item was added
-        String dateAdded = null;
-        if(today) {
-            dateAdded = (new Date()).toString();
+        getFridgeCapacity();
+        getNumItems();
+        if (capacity != -1 && numItems >= capacity) {
+            Toast.makeText(
+                    this,
+                    "Sorry, fridge is full: " + numItems + "/" + capacity,
+                    Toast.LENGTH_LONG)
+                .show();
         } else {
-            EditText dateAddedView = (EditText) findViewById(R.id.dateAdded);
-            dateAdded = dateAddedView.getText().toString();
+            //item type
+            EditText typeView = (EditText) findViewById(R.id.type);
+            String type = typeView.getText().toString();
+            //Log.v("type",type);
+
+            //expiration date
+            EditText expDateView = (EditText) findViewById(R.id.expDate);
+            String expDate = expDateView.getText().toString();
+            //Log.v("expDate",expDate);
+
+            //date item was added
+            String dateAdded = null;
+            if (today) {
+                dateAdded = (new Date()).toString();
+            } else {
+                EditText dateAddedView = (EditText) findViewById(R.id.dateAdded);
+                dateAdded = dateAddedView.getText().toString();
+            }
+            //Log.v("dateAdded", dateAdded);
+
+            //note on the item
+            EditText noteView = (EditText) findViewById(R.id.note);
+            String note = noteView.getText().toString();
+            //Log.v("note",note);
+            //Log.v("public", publicNote ? "true" : "false");
+
+            //call function that adds to the data base
+            addItemToDataBase(type, expDate, dateAdded, note, null);
+
+            //go to the submission page
+            goToSubmissionPage();
         }
-        //Log.v("dateAdded", dateAdded);
+    }
 
-        //note on the item
-        EditText noteView = (EditText) findViewById(R.id.note);
-        String note = noteView.getText().toString();
-        //Log.v("note",note);
-        //Log.v("public", publicNote ? "true" : "false");
+    public void getFridgeCapacity() {
+        try {
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            executor.execute( () -> {
+            try {
+                // /capacity endpoint returns a JSON object with
+                // a field called "capacity"
 
-        //call function that adds to the data base
-        addItemToDataBase(type, expDate, dateAdded, note, null);
+                URL url = new URL("http://10.0.2.2:3000/capacity");
 
-        //go to the submission page
-        goToSubmissionPage();
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("GET");
+                conn.connect();
+
+                Scanner in = new Scanner(url.openStream());
+                String response = in.nextLine();
+
+                JSONObject jo = new JSONObject(response);
+                String value = jo.getString("capacity");
+                // only set capacity if got a number back
+                if (!value.equalsIgnoreCase("undefined")) {
+                    capacity = Integer.parseInt(value);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            });
+            // this waits for up to 2 seconds
+            // it's a bit of a hack because it's not truly asynchronous
+            // but it should be okay for our purposes (and is a lot easier)
+            executor.awaitTermination(2, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            // uh oh
+            e.printStackTrace();
+        }
+    }
+
+    public void getNumItems() {
+        try {
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            executor.execute( () -> {
+                try {
+                    // /api endpoint returns a JSON array of JSON objects
+                    URL url = new URL("http://10.0.2.2:3000/api");
+
+                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                    conn.setRequestMethod("GET");
+                    conn.connect();
+
+                    Scanner in = new Scanner(url.openStream());
+                    String response = in.nextLine();
+
+                    JSONArray jsonArray = new JSONArray(response);
+                    numItems = jsonArray.length();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+            // this waits for up to 2 seconds
+            // it's a bit of a hack because it's not truly asynchronous
+            // but it should be okay for our purposes (and is a lot easier)
+            executor.awaitTermination(2, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            // uh oh
+            e.printStackTrace();
+        }
     }
 
     public void addItemToDataBase(String type, String expDate, String dateAdded, String note, String userName) {
