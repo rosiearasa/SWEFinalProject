@@ -9,9 +9,11 @@ mongoose.connect('mongodb://127.0.0.1:27017/myDatabase');
 var Schema = mongoose.Schema;
 
 var fridgeSchema = new Schema({
-	id: {type: Number, required: true, unique: true},
+	// id: {type: Number, required: true, unique: true},
   users: [],
-  items: []
+  items: [],
+	function: {type: String},
+	capacity: {type: Number}
     });
 
 // export fridgeSchema as a class called Fridge
