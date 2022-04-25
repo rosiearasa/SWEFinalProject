@@ -35,28 +35,7 @@
 
         </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Expiration Date:"
-                android:textSize="25dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <EditText
-                android:id="@+id/expDate"
-                android:layout_height="wrap_content"
-                android:layout_width="match_parent"
-                android:inputType="date" />
-
-        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -67,11 +46,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Date Added: "
-                android:textSize="25dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                android:textSize="25dp"/>
 
             <CheckBox
                 android:id="@+id/today"
@@ -91,7 +66,67 @@
 
         </LinearLayout>
 
-        //associate with user somehow
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Expiration Date:"
+                android:textSize="25dp"/>
+
+            <EditText
+                android:id="@+id/expDate"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:inputType="date"
+                android:hint="e.g. 1/1/2000"/>
+
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="82dp"
+                android:layout_height="match_parent"
+                android:text="Expiration dates for:"
+                android:textSize="18dp" />
+
+            <CheckBox
+                android:id="@+id/fruit"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:onClick="onItemTypeCheckboxClicked"
+                android:text="Fruit" />
+
+            <CheckBox
+                android:id="@+id/meat"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:onClick="onItemTypeCheckboxClicked"
+                android:text="Meat" />
+
+            <CheckBox
+                android:id="@+id/milk"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:onClick="onItemTypeCheckboxClicked"
+                android:text="Milk" />
+
+            <CheckBox
+                android:id="@+id/other"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:onClick="onItemTypeCheckboxClicked"
+                android:text="Other" />
+
+        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -125,6 +160,14 @@
 
         </LinearLayout>
 
+
+        <CheckBox
+            android:id="@+id/anonymous"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:textSize="18dp"
+            android:text="Make item anonymous (other users can't who added it)"
+            android:onClick="onAnonymousCheckboxClicked"/>
 
         <Button
             android:layout_width="match_parent"

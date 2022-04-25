@@ -3,6 +3,7 @@ package edu.brynmawr.cs353.thefridge;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.EditText;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -14,23 +15,19 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
     }
 
-    public void addItemButtonClick(View v) {
-        Intent intent = new Intent(this, AddItemActivity.class);
-        startActivity(intent);
-    }
-
     public void registerUserButtonClick(View v) {
         Intent intent = new Intent (this, RegisterUserFragment.class);
         startActivity(intent);
     }
 
-    public void deleteItemButtonClick(View v) {
-        Intent intent = new Intent(this, AddItemActivity.class);
-        startActivity(intent);
-    }
+    public void onSignIn(View v) {
+        Intent intent = new Intent (this, HomePageActivity.class);
 
-    public void seeItemsButtonClick(View v) {
-        Intent intent = new Intent(this, SeeItemsActivity.class);
+        EditText signInNameView = (EditText) findViewById(R.id.name);
+        EditText signInRoomView = (EditText) findViewById(R.id.roomNumber);
+        String user = signInNameView.getText().toString() + " (" + signInRoomView.getText().toString() + ")";
+
+        intent.putExtra("user", user);
         startActivity(intent);
     }
 

@@ -19,6 +19,7 @@
  *   ~ /delete (AP):
  *   ~ /api:
  *   ~ /all_users (JL): really quick implementation, just to see the users
+ *   ~ /capacity (JL): shows current fridge capacity in api form
  *   ~ /home (JL): links to all other web pages; other web pages may or may not link back
  */
 
@@ -35,11 +36,35 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // import the Item, Person, and Fridge
 var Item = require('./Item.js');
 var User = require('./User.js');
-//var Fridge = require('./Fridge.js');
+var Fridge = require('./Fridge.js');
 const { json } = require('express/lib/response');
 
 // fridge capacity
 var capacity;
+
+// look for primary fridge, or create new one if nonexistent
+var fridgeFilter = {'type' : "PRIMARY"};
+Fridge.findOne(fridgeFilter, (err, fridge) => {
+	if (err) {
+		console.log('error looking for fridge: ' + err);
+	} else if (!fridge) {
+			// no fridge found, create new one
+			var newFridge = new Fridge({
+				function: 'PRIMARY',
+			});
+			newFridge.save((err) => {
+				if (err) {
+					console.log("error saving fridge: " + err);
+				} else {
+					console.log("created new fridge: \n" + newFridge);
+				}
+			});
+	} else {
+		// fridge found, get the saved capacity
+		capacity = fridge.capacity;
+		console.log("found fridge with capacity " + capacity);
+	}
+});
 
 //add user to the database
 app.use('/adduser', (req,res)=>{
@@ -47,22 +72,25 @@ app.use('/adduser', (req,res)=>{
 	var newUser = new User({
 		name: req.body.name,
 		roomNumber: req.body.roomNumber,
-});
-console.log(newUser)
+	});
+	console.log(newUser)
 
-// //save the user to the database
+   //save the user to the database
 	newUser.save((err) => {
 		if (err) {
 		    res.type('html').status(200);
 		    res.write('uh oh: ' + err);
+			res.write('<br> <a href=\"/home\">Go back to Home</a>');
+			res.write("   <a href=\"/public/addUserForm.html\">Click here to add an User</a>");
 		    console.log(err);
 		    res.end();
 		}
-				else{
-					res.json({'status': 'success'})
+		if(!err) {
 		    // display the "successfull created" message
-		    res.send('successfully added ' + newUser.name + ' to the database');
-			
+			res.write(' <a href=\"/home\">Go back to Home</a>');
+			res.write("   <a href=\"/public/addUserForm.html\">Click here to add an User</a>");
+		    res.write('<br><br> Successfully added ' + newUser.name + ' to the database');
+			//res.redirect('/allusers');
 			res.end();
 
 		}
@@ -98,11 +126,12 @@ app.use('/allusers', (req, res) => {
 			    res.write('<li>');
 			    res.write('Name: ' + user.name + '; RoomNumber: ' + user.roomNumber);
 			    // this creates a link to the /delete endpoint
-			    res.write(" <a href=\"/deleteuser?name=" + user.name + "\">[Delete]</a>");
+				res.write(" <a href = \"/deleteuser?name=" + user.name + "\" onclick = \"return confirm('Delete this user from the fridge?');\">[Delete]</a>");
 			    res.write('</li>');
 
 			});
 			res.write('</ul>');
+			res.write(' <a href=\"/home\">Go back to Home</a>');
 			res.end();
 		    }
 
@@ -311,7 +340,8 @@ app.use('/edit_item_expDate', (req, res) => {
 			});
 		} else {
 			// no new info given
-			res.send('no update to expDate');
+			res.write('no update to expDate');
+			res.write('<br> <a href=\"/home\">Go back to Home</a>');
 		}
 	} else {
 		// no id given, cannot find item
@@ -320,16 +350,46 @@ app.use('/edit_item_expDate', (req, res) => {
 	}
 });
 
+// finds the name and room number of a user from the id
+async function getUserString (id) {
+	// choose a user
+	let userName = null;
+	//wait for response
+	//https://zellwk.com/blog/async-await-express/
+	await User.findOne( {'_id' : id }, (err, user) => {
+		if (err) {
+			console.log('uh oh' + err);
+			return null;
+		} else {
+			//check if null
+			if(user == null) {
+				return null;
+			} else {
+				//console.log("In else, name is " + user.name);
+				//return user.name;
+				userName = user.name + ' (' + user.roomNumber + ')';
+				//return user.name;
+			}
+		}
+	}).clone();
+	//console.log("Found name 2: " + userName);
+	return userName
+}
+
 // edit item's user field (JL)
-app.use('/edit_item_owner', (req, res) => {
+app.use('/edit_item_owner', async (req, res) => {
 	var id = req.body.id;
-	var owner = req.body.owner;  // an ID, not a name, currently
+	var owner = req.body.owner;
+	var ownerName = await getUserString(owner);
+	console.log(ownerName);
+	//var owner = findUser(req.body.owner);  // an ID, not a name, currently
+	//console.log(owner);
 	if (id) {
 		res.type('html');
 		var filter = {'_id' : id};
-		console.log("look for id: " + id);
-		if (owner) {
-			var action = {'$set' : {'user' : owner}};
+		//console.log("look for id: " + id);
+		if (req.body.owner) {
+			var action = {'$set' : {'user' : owner, 'userName': ownerName}};
 			Item.findOneAndUpdate(filter, action, (err, orig) => {
 				if (err) {
 					res.send('error: ' + err);
@@ -389,14 +449,29 @@ app.use('/edit_capacity', (req, res) => {
 	if (!numItems || isNaN(numItems)) {
 		res.write("Invalid number, no update to capacity.<p>");
 		res.write('<a href=\"/home\">Go back to Home</a>');
+		res.send();
 		console.log("capacity: " + capacity);
 	} else {
-		capacity = numItems;
-		res.write("Successfully changed the fridge capacity to " + capacity + " items.<p>");
-		res.write('<a href=\"/home\">Go back to Home</a>');
-		console.log("capacity: " + capacity);
+		var action = {'$set' : {'capacity' : numItems}};
+		Fridge.findOneAndUpdate(fridgeFilter, action, (err, orig) => {
+			if (err) {
+				res.write("error editing fridge");
+				res.write('<a href=\"/home\">Go back to Home</a>');
+				res.send();
+			} else if (!orig) {
+				res.write("no fridge found?!");
+				res.write('<a href=\"/home\">Go back to Home</a>');
+				res.send();
+			} else {
+				// update current local capacity also
+				capacity = numItems;
+				res.write("Successfully changed the fridge capacity to " + capacity + " items.<p>");
+				res.write('<a href=\"/home\">Go back to Home</a>');
+				console.log("capacity: " + capacity);
+				res.send();
+			}
+		});
 	}
-	res.send();
 });
 
 //reads the info from the form and passes it to /add_item
@@ -412,16 +487,16 @@ app.use('/read_add_item_form', (req, res) => {
 	anonymous = false,      // default not anonymous
 	//any note associated with the item, true if it's public and false if private
 	note = req.body.note
-	//public = req.body.public=='yes'
+	public = (req.body.public=='yes');
 
-	let url = `/add_item?type=${type}&expDate=${expDate}&dateAdded=${dateAdded}&user=${user}&inFridge=${inFridge}&anonymous=${anonymous}&note=${note}&public=${req.body.public}`
+	let url = `/add_item?type=${type}&expDate=${expDate}&dateAdded=${dateAdded}&user=${user}&inFridge=${inFridge}&anonymous=${anonymous}&note=${note}&public=${public}&userName=${null}`
 	res.redirect(url)
 });
 
 //adds the item to the database (MJ)
 app.use('/add_item', (req, res) => {
 	// construct the Item from the form data which is in the request body
-	console.log("got here");
+	//console.log("got here");
 	res.type('html').status(200);
 	Item.countDocuments( (err, count) => {
 		if (err) {
@@ -438,11 +513,11 @@ app.use('/add_item', (req, res) => {
 				//the date the item was added - current date if 'today' was checked, otherwise the specified date
 				dateAdded:((req.query.today=='yes') ? Date.now() : req.query.dateAdded),
 				user: null,							//the user associated with it - null if added from the web
+				userName: req.query.userName,
 				inFridge: 0,						//the fridge the item is in - all in fridge 0 right now
-				anonymous: false,      // default not anonymous
-				id: Date.now(),
+				anonymous: req.query.anonymous,      // default not anonymous
 				//any note associated with the item, true if it's public and false if private
-				note: [req.query.note, req.query.public=='yes']
+				note: [req.query.note, req.query.public]
 				});
 			console.log(newItem);
 
@@ -450,13 +525,16 @@ app.use('/add_item', (req, res) => {
 			newItem.save( (err) => {
 				if (err) {
 					res.write('uh oh: ' + err);
+					res.write('<br> <a href=\"/home\">Go back to Home</a>');
+					res.write("   <a href=\"/public/addItemForm.html\">Click here to add an item</a>");
 					console.log(err);
 					res.end();
 				}
 				else {
 					// display the "successfull created" message
 					res.write('Successfully added ' + newItem.type + ' to the database');
-					res.write("<br><a href=\"/public/addItemForm.html\">Click here to add another item</a>");
+					res.write('<br> <a href=\"/home\">Go back to Home</a>');
+					res.write("   <a href=\"/public/addItemForm.html\">Click here to add another item</a>");
 					res.end();
 				}
 				} );
@@ -511,16 +589,17 @@ app.use('/all', (req, res) => {
 					if (item.anonymous == false)
 					{
 						anonymous = 'False';
-						owner = item.user;
+						owner = item.userName;
 					}
 
 					res.write('<li>');
-						res.write('Type: ' + item.type + '; Expiration Date: ' + item.expDate + '; Date Added: ' + item.dateAdded + '; Owner: ' + owner + '; Anonymity: ' + anonymous);
+						res.write(item.type + '  -  expires on ' + (item.expDate).toDateString() + ' and added on ' + (item.dateAdded).toDateString() + '; Owner: ' + owner + ', anonymous - ' + anonymous);
 
 						// this creates a link to the /delete endpoint
-						res.write(" <a href=\"/delete?id=" + item._id + "\">[Delete]</a>");
+						res.write(" <a href=\"/delete?id=" + item._id + "\" onclick = \"return confirm('Delete this item from the fridge?');\""+">[Delete]</a>");
 						res.write('</li>');
 				});
+				res.write("<br><br><a href=\"/home\">Go back to Home</a>");
 
 				res.end();
 			}
@@ -557,13 +636,14 @@ app.use('/show_expired', (req, res) => {
 					if(item.expDate < Date.now()) {
 						res.write('<li>');
 						res.write(item.type + ' expired on ' + (item.expDate).toDateString());
-						res.write('<br>&emsp;Belongs to: ' + item.user);
+						res.write('<br>&emsp;Belongs to: ' + item.userName);
 						//if there's a note, display it; otherwise, say 'No note'
 						res.write(';&emsp;' + ((item.note[0]!=undefined && item.note[0]!='') ? 'Note: ' + item.note[0] : 'No note'));
 						res.write('</li>');
 					}
 				});
 				res.write('</ul>');
+				res.write(' <a href=\"/home\">Go back to Home</a>');
 
 				res.end();
 			}
@@ -605,7 +685,7 @@ app.use('/api', (req, res) => {
 	// construct the query object
 	var queryObject = {};
 
-	Item.find( queryObject, (err, items) => {
+	Item.find( queryObject, async (err, items) => {
 		console.log(items);
 		if (err) {
 		    console.log('uh oh' + err);
@@ -613,27 +693,35 @@ app.use('/api', (req, res) => {
 		}
 		else if (items.length == 0) {
 		    // no objects found, so send back empty json
-		    res.json({});
+
+			/*res.write('  <a href=\"/home\">Go back to Home</a> <br> <br>');
+			res.end(JSON.stringify({}));*/
+			res.json({});
+
 		}
 		else if (items.length == 1 ) {
 		    var item = items[0];
-		    // send back a single JSON object
-		    //res.json( { "type" : item.type, "id" : item.id , "expDate" : item.expDate, "dateAdded" : item.dateAdded } );
-			res.json( { 'type' : item.type, 'expDate' : (item.expDate).toDateString(), 'date Added' : (item.dateAdded).toDateString(), 'owner' : item.user, 'anonymous' : item.anonymous } );
+			// send back a single JSON object
+			/*var returnString = { 'type' : item.type, 'expDate' : (item.expDate).toDateString(), 'date Added' : (item.dateAdded).toDateString(), 'owner' : item.userName, 'anonymous' : item.anonymous, 'note' : item.note[0], 'publicNote' : item.note[1] }
+			res.write('  <a href=\"/home\">Go back to Home</a> <br> <br>');
+			res.end(JSON.stringify(returnString));*/
+			res.json( { 'type' : item.type, 'expDate' : (item.expDate).toDateString(), 'date Added' : (item.dateAdded).toDateString(), 'owner' : item.userName, 'anonymous' : item.anonymous, 'note' : item.note[0], 'publicNote' : item.note[1], "_id" :item._id } );
 		}
 		else {
 		    // construct an array out of the result
 		    var returnArray = [];
-		    items.forEach( (item) => {
-			    //returnArray.push( { "type" : item.type, "id" : item.id , "expDate" : item.expDate, "dateAdded" : item.dateAdded } );
-				returnArray.push( { 'type' : item.type, 'expDate' : (item.expDate).toDateString(), 'date Added' : (item.dateAdded).toDateString(), 'owner' : item.user, 'anonymous' : item.anonymous } );
+		    items.forEach( async (item) => {
+				returnArray.push( { 'type' : item.type, 'expDate' : (item.expDate).toDateString(), 'date Added' : (item.dateAdded).toDateString(), 'owner' : item.userName, 'anonymous' : item.anonymous, 'note' : item.note[0], 'publicNote' : item.note[1], "_id" : item._id } );
 			});
 		    // send it back as JSON Array
-		    res.json(returnArray);
+			/*res.write('  <a href=\"/home\">Go back to Home</a> <br> <br>');
+			res.end(JSON.stringify(returnArray));*/
+			res.json(returnArray);
 		}
 
-	    });
-    });
+	}).sort({'expDate': 'asc'});
+
+});
 
 // list all users, formatted like /api (JL)
 app.use('/all_users', (req, res) => {
@@ -642,9 +730,21 @@ app.use('/all_users', (req, res) => {
 			console.log('error: ' + err);
 		} else {
 			console.log(users);
-			res.json(users);
+
+			res.write('  <a href=\"/home\">Go back to Home</a> <br> <br>');
+			res.end(JSON.stringify(users));
+			//res.json(users);
 		}
 	});
+});
+
+// show capacity in API form, for use in Android (JL)
+app.use('/capacity', (req, res) => {
+	if (!capacity) {
+		res.json({'capacity' : 'undefined'});
+	} else {
+		res.json({'capacity' : capacity});
+	}
 });
 
 // home page with links to other pages
@@ -703,6 +803,10 @@ app.use('/home', (req, res) => {
 	// expired items
 	res.write('<li>');
 	res.write(" <a href=\"/show_expired" + "\">Expired Items</a>");
+	res.write('</li>');
+	// capacity
+	res.write('<li>');
+	res.write(" <a href=\"/capacity" + "\">Fridge Capacity</a>");
 	res.write('</li>');
 	// all users
 	res.write('<li>');

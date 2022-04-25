@@ -14,9 +14,9 @@ var ItemSchema = new Schema({
     expDate: {type: Date, required: true},
     dateAdded: Date,
     user: {type: Schema.ObjectId, ref: 'User'},
+    userName: String,
     inFridge: {type: Number, required: true},
     anonymous: Boolean,
-    id: Number,
     note: [] //[note, public? (true for public, false for private)]
     });
 

@@ -20,11 +20,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".HomePageActivity"/>
         <activity android:name=".AddItemActivity" />
         <activity android:name=".AddItemSubmission" />
         <activity android:name=".RegisterUserFragment"/>
         <activity android:name=".SeeItemsActivity"/>
-        <activity android:name=".MyItems"/>
+        <activity android:name=".DeleteItemActivity"/>
 
     </application>
 
